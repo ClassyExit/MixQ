@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+<<<<<<< HEAD
     "build": "vue-tsc -b && vite build && cp .env ./build/.env",
+=======
+    "build": "vue-tsc -b && vite build",
+>>>>>>> origin/main
     "preview": "vite preview"
   },
   "dependencies": {
