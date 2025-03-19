@@ -45,7 +45,7 @@ const addSong = async () => {
       .from("songs")
       .select("queue")
       .eq("code", props.code)
-      .single();
+      .maybeSingle();
 
     if (fetchError) throw fetchError;
 

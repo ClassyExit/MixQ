@@ -1,0 +1,4 @@
+{
+  "imports": {},
+  "lib": ["deno.ns"]
+}
