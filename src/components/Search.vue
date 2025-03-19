@@ -78,23 +78,13 @@
               />
               <div class="truncate">{{ song.title }}</div>
 
-              <button
-                @click="addSong(song)"
-                class="btn btn-sm ml-auto text-content-base"
-                aria-label="Add Song"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M11.5 16.5h1v-4h4v-1h-4v-4h-1v4h-4v1h4zm.503 4.5q-1.867 0-3.51-.708q-1.643-.709-2.859-1.924t-1.925-2.856T3 12.003t.709-3.51Q4.417 6.85 5.63 5.634t2.857-1.925T11.997 3t3.51.709q1.643.708 2.859 1.922t1.925 2.857t.709 3.509t-.708 3.51t-1.924 2.859t-2.856 1.925t-3.509.709M12 20q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-                  />
-                </svg>
-              </button>
+              <add_song_action
+                :video_id="song.video_id"
+                :title="song.title"
+                :thumbnail="song.thumbnail"
+                :duration="song.duration"
+                :code="roomId"
+              />
             </li>
           </ul>
           <p v-else-if="loading" class="text-center text-gray-500">
@@ -109,15 +99,23 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-
+import add_song_action from "./add_song_action.vue";
 import { searchMusicAPI } from "../api/search"; // Move API logic to a separate file
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const roomId = ref((router.currentRoute.value.params.id as string) || "");
 
 const music_modal = ref<HTMLDialogElement | null>(null);
 const searchQuery = ref("");
 const searchResults = ref<
-  { video_id: string; title: string; thumbnail: string; duration: string }[]
+  {
+    video_id: string;
+    title: string;
+    thumbnail: string;
+    duration: string;
+  }[]
 >([]);
-
 const loading = ref(false);
 
 const openModal = () => music_modal.value?.showModal();
@@ -134,21 +132,13 @@ const searchMusic = async () => {
   searchResults.value = [];
 
   try {
-    searchResults.value = await searchMusicAPI(searchQuery.value);
+    const results = await searchMusicAPI(searchQuery.value);
+    searchResults.value = results || [];
   } catch (error) {
     console.error("Search failed:", error);
+    searchResults.value = []; // Ensure state resets on failure
   } finally {
     loading.value = false;
   }
-};
-
-const addSong = (song: {
-  video_id: string;
-  title: string;
-  thumbnail: string;
-  duration: string;
-}) => {
-  // Add song to the queue
-  console.log("Adding song:", song);
 };
 </script>

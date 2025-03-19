@@ -44,7 +44,7 @@ export function showNotification(
   notification.innerHTML = `
     <span class="h-6 w-6">${alerts[type].icon}</span>
     <span>${message}</span>
-    <button onclick="document.getElementById('${notificationId}')?.remove()" class="ml-2 text-gray-400 hover:text-white">&times;</button>
+    <button onclick="document.getElementById('${notificationId}')?.remove()" class="ml-2 text-gray-400 hover:text-white"></button>
   `;
 
   // Append to container
