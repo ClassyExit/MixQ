@@ -61,7 +61,7 @@ const createHostRoom = async () => {
     if (roomError) throw roomError;
 
     // Insert into "song_queue" table
-    const { error: queueError } = await supabase.from("song_queue").insert([
+    const { error: queueError } = await supabase.from("songs").insert([
       {
         code: roomId,
         queue: [],
