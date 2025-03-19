@@ -42,7 +42,6 @@
             type="text"
             class="input input-bordered w-full"
             placeholder="Search for songs..."
-            @keyup="debouncedSearch"
           />
           <button
             @click="searchMusic"
@@ -146,6 +145,7 @@ const addSong = (song: {
   video_id: string;
   title: string;
   thumbnail: string;
+  duration: string;
 }) => {
   // Add song to the queue
   console.log("Adding song:", song);
