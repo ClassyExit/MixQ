@@ -5,7 +5,7 @@
     <div class="flex flex-col h-full md:w-8/12 rounded space-y-4">
       <router-link class="text-3xl" :to="{ name: 'Home' }"> MixQ </router-link>
 
-      <div class="bg-base-100 flex-1">Audio visualizer</div>
+      <div class="bg-base-100 flex-1"><AudioVisualizer /></div>
     </div>
 
     <div class="md:w-4/12 flex-1 flex flex-col space-y-4">
@@ -64,6 +64,7 @@
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
+import AudioVisualizer from "../components/AudioVisualizer.vue";
 
 const router = useRouter();
 const roomId = router.currentRoute.value.params.id;
@@ -72,11 +73,7 @@ const moveToRoom = () => {
   router.push({ name: "Room", params: { id: roomId.toString() } });
 };
 
-const roomLinkValue = `https://127.0.0.1:5173/room/${roomId}`;
-
-// const generateRoomLink = () => {
-//   return `https:/localhost:5173/room/${roomId}`;
-// };
+const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId}`;
 
 const songList: any = ref([]);
 // const songList = [
