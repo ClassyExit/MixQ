@@ -16,6 +16,8 @@
             class="input w-full"
             v-model="roomCode"
             placeholder="Enter room code"
+            autofocus="false"
+            tabindex="-1"
           />
         </div>
       </div>

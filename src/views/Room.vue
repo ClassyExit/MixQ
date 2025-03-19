@@ -29,9 +29,10 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { ref } from "vue";
 
 import Search from "../components/Search.vue";
 
 const router = useRouter();
-const roomId = router.currentRoute.value.params.id;
+const roomId = ref((router.currentRoute.value.params.id as string) || "");
 </script>

@@ -42,6 +42,8 @@
             type="text"
             class="input input-bordered w-full"
             placeholder="Search for songs..."
+            autofocus="false"
+            tabindex="-1"
           />
           <button
             @click="searchMusic"

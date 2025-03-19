@@ -158,7 +158,7 @@ const subscribeToQueueUpdates = () => {
         filter: `code=eq.${roomId.value}`,
       },
       (payload) => {
-        console.log("Queue updated!", payload.new.queue);
+        // console.log("Queue updated!", payload.new.queue);
         songList.value = payload.new.queue;
       }
     )
