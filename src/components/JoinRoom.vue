@@ -1,0 +1,66 @@
+<template>
+  <div class="">
+    <div v-if="isCheckingRoom" class="">
+      <span class="loading text-primary loading-ring loading-md"></span>
+      <div class="animate-pulse">Finding room...</div>
+    </div>
+
+    <div v-else class="indicator">
+      <div class="indicator-item indicator-bottom">
+        <button @click="joinRoom()" class="btn btn-secondary">Join</button>
+      </div>
+      <div class="card border border-base-300 bg-base-100 shadow-sm">
+        <div class="card-body">
+          <h2 class="text-left text-white text-lg">Join a Room</h2>
+          <input
+            class="input w-full"
+            v-model="roomCode"
+            placeholder="Enter room code"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import { supabase } from "../utils/supabase";
+import { showNotification } from "../utils/notifications";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const roomCode = ref("");
+
+const isCheckingRoom = ref(false);
+
+const joinRoom = async () => {
+  if (!roomCode.value) {
+    return;
+  }
+
+  isCheckingRoom.value = true;
+
+  // Fetch room data from Supabase
+  const { data, error } = await supabase
+    .from("room")
+    .select()
+    .eq("code", roomCode.value.trim())
+    .maybeSingle();
+
+  if (error || !data) {
+    showNotification(
+      `No room found with room code: ${roomCode.value}`,
+      "error",
+      3000
+    );
+    isCheckingRoom.value = false;
+    return;
+  }
+
+  isCheckingRoom.value = false;
+  // Redirect to room page
+  router.push({ name: "Host", params: { id: data.code } });
+};
+</script>

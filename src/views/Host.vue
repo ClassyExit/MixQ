@@ -62,6 +62,7 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { ref } from "vue";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
 
 const router = useRouter();
@@ -77,76 +78,77 @@ const roomLinkValue = `https://127.0.0.1:5173/room/${roomId}`;
 //   return `https:/localhost:5173/room/${roomId}`;
 // };
 
-const songList = [
-  {
-    id: 1,
-    title: "Song 1",
-    artist: "Artist 1",
-    album: "Album 1",
-    duration: "3:45",
-  },
-  {
-    id: 2,
-    title: "Song 2",
-    artist: "Artist 2",
-    album: "Album 2",
-    duration: "4:20",
-  },
-  {
-    id: 3,
-    title: "Song 3",
-    artist: "Artist 3",
-    album: "Album 3",
-    duration: "2:30",
-  },
-  {
-    id: 4,
-    title: "Song 4",
-    artist: "Artist 4",
-    album: "Album 4",
-    duration: "3:15",
-  },
-  {
-    id: 5,
-    title: "Song 5",
-    artist: "Artist 5",
-    album: "Album 5",
-    duration: "3:00",
-  },
-  {
-    id: 6,
-    title: "Song 6",
-    artist: "Artist 6",
-    album: "Album 6",
-    duration: "4:00",
-  },
-  {
-    id: 7,
-    title: "Song 7",
-    artist: "Artist 7",
-    album: "Album 7",
-    duration: "3:30",
-  },
-  {
-    id: 8,
-    title: "Song 8",
-    artist: "Artist 8",
-    album: "Album 8",
-    duration: "2:45",
-  },
-  {
-    id: 9,
-    title: "Song 9",
-    artist: "Artist 9",
-    album: "Album 9",
-    duration: "3:00",
-  },
-  {
-    id: 10,
-    title: "Song 10",
-    artist: "Artist 10",
-    album: "Album 10",
-    duration: "3:45",
-  },
-];
+const songList: any = ref([]);
+// const songList = [
+//   {
+//     id: 1,
+//     title: "Song 1",
+//     artist: "Artist 1",
+//     album: "Album 1",
+//     duration: "3:45",
+//   },
+//   {
+//     id: 2,
+//     title: "Song 2",
+//     artist: "Artist 2",
+//     album: "Album 2",
+//     duration: "4:20",
+//   },
+//   {
+//     id: 3,
+//     title: "Song 3",
+//     artist: "Artist 3",
+//     album: "Album 3",
+//     duration: "2:30",
+//   },
+//   {
+//     id: 4,
+//     title: "Song 4",
+//     artist: "Artist 4",
+//     album: "Album 4",
+//     duration: "3:15",
+//   },
+//   {
+//     id: 5,
+//     title: "Song 5",
+//     artist: "Artist 5",
+//     album: "Album 5",
+//     duration: "3:00",
+//   },
+//   {
+//     id: 6,
+//     title: "Song 6",
+//     artist: "Artist 6",
+//     album: "Album 6",
+//     duration: "4:00",
+//   },
+//   {
+//     id: 7,
+//     title: "Song 7",
+//     artist: "Artist 7",
+//     album: "Album 7",
+//     duration: "3:30",
+//   },
+//   {
+//     id: 8,
+//     title: "Song 8",
+//     artist: "Artist 8",
+//     album: "Album 8",
+//     duration: "2:45",
+//   },
+//   {
+//     id: 9,
+//     title: "Song 9",
+//     artist: "Artist 9",
+//     album: "Album 9",
+//     duration: "3:00",
+//   },
+//   {
+//     id: 10,
+//     title: "Song 10",
+//     artist: "Artist 10",
+//     album: "Album 10",
+//     duration: "3:45",
+//   },
+// ];
 </script>

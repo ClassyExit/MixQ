@@ -20,6 +20,7 @@
 import { ref } from "vue";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "vue-router";
+import { showNotification } from "../utils/notifications";
 
 const router = useRouter();
 
@@ -59,12 +60,14 @@ const createHostRoom = async () => {
 
   if (error) {
     errorCreatingRoom.value = error.message;
+    showNotification("Error creating room. Please try again", "error", 3000);
     isCreatingRoom.value = false;
     return;
   }
 
   isCreatingRoom.value = false;
 
+  showNotification("Created room", "success", 3000);
   // Redirect to host room page
   router.push({ name: "Host", params: { id: roomId } });
 };

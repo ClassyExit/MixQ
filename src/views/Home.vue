@@ -16,21 +16,8 @@
         <CreateHostRoom />
 
         <div class="divider md:divider-horizontal py-4 px-4">OR</div>
-        <div class="indicator">
-          <div class="indicator-item indicator-bottom">
-            <button class="btn btn-secondary">Join</button>
-          </div>
-          <div class="card border border-base-300 bg-base-100 shadow-sm">
-            <div class="card-body">
-              <h2 class="text-left text-white text-lg">Join a Room</h2>
-              <input
-                class="input w-full"
-                v-model="roomCode"
-                placeholder="Enter room code"
-              />
-            </div>
-          </div>
-        </div>
+
+        <JoinRoom />
       </div>
     </section>
 
@@ -64,18 +51,13 @@
     <footer class="py-6 text-center bg-gray-900">
       <p class="text-gray-400">&copy; 2025 MixQ. All rights reserved.</p>
     </footer>
+    <Notifications message="Hello there" type="success" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { showNotification } from "../utils/notifications";
-
-showNotification("Room created successfully!", "info", 3000);
-
 import CreateHostRoom from "../components/CreateHostRoom.vue";
-
-const roomCode = ref("");
+import JoinRoom from "../components/JoinRoom.vue";
 </script>
 
 <style scoped></style>
