@@ -5,7 +5,7 @@
     <div class="flex flex-col h-full md:w-8/12 rounded space-y-4">
       <router-link class="text-3xl" :to="{ name: 'Home' }"> MixQ </router-link>
 
-      <div class="bg-base-100 flex-1"><AudioVisualizer /></div>
+      <div class="bg-base-100 flex-1">Audio player here</div>
     </div>
 
     <div class="md:w-4/12 flex-1 flex flex-col space-y-4">
