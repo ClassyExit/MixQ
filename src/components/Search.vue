@@ -115,8 +115,9 @@ import { searchMusicAPI } from "../api/search"; // Move API logic to a separate 
 const music_modal = ref<HTMLDialogElement | null>(null);
 const searchQuery = ref("");
 const searchResults = ref<
-  { video_id: string; title: string; thumbnail: string }[]
+  { video_id: string; title: string; thumbnail: string; duration: string }[]
 >([]);
+
 const loading = ref(false);
 
 const openModal = () => music_modal.value?.showModal();
