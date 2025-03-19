@@ -3,7 +3,6 @@
     class="w-full md:h-screen bg-base-200 flex flex-col space-y-4 md:space-y-0 p-4 md:flex-row md:justify-between space-x-0 md:space-x-4"
   >
     <div class="flex flex-col h-full md:w-8/12 rounded space-y-4">
-<<<<<<< HEAD
       <div class="flex flex-row text-3xl items-center space-x-2">
         <router-link class="w-fit" :to="{ name: 'Home' }"> MixQ </router-link>
       </div>
@@ -35,15 +34,6 @@
         <div class="font-semibold">
           Current:
           <span class="text-primary"> {{ currentSong.title }}</span>
-=======
-      <router-link class="text-3xl w-fit" :to="{ name: 'Home' }">
-        MixQ
-      </router-link>
-
-      <div class="bg-base-100 flex-1">
-        <div :class="containerClass">
-          <div id="player" class="w-full h-full"></div>
->>>>>>> origin/main
         </div>
       </div>
     </div>
@@ -108,11 +98,7 @@
 </template>
 
 <script setup lang="ts">
-<<<<<<< HEAD
 import { ref, onMounted, computed, provide, onUnmounted } from "vue";
-=======
-import { ref, onMounted, computed, provide } from "vue";
->>>>>>> origin/main
 import { useRouter } from "vue-router";
 import { supabase } from "../utils/supabase";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
@@ -122,7 +108,6 @@ import delete_song_action from "../components/delete_song_action.vue";
 const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
 const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId}`;
-<<<<<<< HEAD
 let queueSubscription: any = null; // Store the channel reference
 
 // YouTube Player
@@ -184,56 +169,6 @@ onMounted(async () => {
   await fetchSongs();
   subscribeToQueueUpdates();
 
-=======
-
-// YouTube Player
-let player: any = null;
-
-const containerClass = computed(() => {
-  return "h-[400px] sm:h-[400px] md:h-[400px] lg:h-[600px] xl:h-[800px] ";
-});
-
-// Queue - Initially Empty and fetch songs from DB
-const songList: any = ref([]);
-const currentVideoIndex = ref(0);
-
-// Provide songList & playSong globally
-provide("songList", songList);
-provide("playSong", (index: number) => playSong(index));
-
-const fetchSongs = async () => {
-  const { data, error } = await supabase
-    .from("songs") // Ensure this matches your actual table name
-    .select("queue") // Selecting the queue column
-    .eq("code", roomId.value) // Filtering by room code
-    .single(); // Expecting one row
-
-  if (error) {
-    console.error("Error fetching song queue:", error);
-    return;
-  }
-
-  if (data && data.queue) {
-    // Ensure `data.queue` is an array (not a string)
-    if (typeof data.queue === "string") {
-      try {
-        songList.value = JSON.parse(data.queue); // If it's a string, parse it
-      } catch (err) {
-        console.error("Error parsing song queue:", err);
-      }
-    } else if (Array.isArray(data.queue)) {
-      songList.value = data.queue; // If it's already an array, use it directly
-    } else {
-      console.error("Unexpected queue format:", data.queue);
-    }
-  }
-};
-
-// Load YouTube API
-onMounted(async () => {
-  await fetchSongs(); // Fetch songs first
-
->>>>>>> origin/main
   if (songList.value.length === 0) {
     console.warn(
       "No songs found in queue, YouTube player will not initialize."
@@ -246,7 +181,6 @@ onMounted(async () => {
   document.body.appendChild(tag);
 
   window.onYouTubeIframeAPIReady = () => {
-<<<<<<< HEAD
     initializePlayer();
   };
 });
@@ -285,23 +219,6 @@ const loadPlayer = () => {
   }, 500);
 };
 
-=======
-    player = new window.YT.Player("player", {
-      height: "360",
-      width: "640",
-      videoId: songList.value[currentVideoIndex.value].video_id,
-      playerVars: {
-        autoplay: 1,
-        controls: 1,
-      },
-      events: {
-        onStateChange: onPlayerStateChange,
-      },
-    });
-  };
-});
-
->>>>>>> origin/main
 // Function to Play Song from Queue
 const playSong = (index: number) => {
   if (!songList.value.length || !songList.value[index]) {
@@ -312,11 +229,8 @@ const playSong = (index: number) => {
   currentVideoIndex.value = index;
   if (player) {
     player.loadVideoById(songList.value[index].video_id);
-<<<<<<< HEAD
   } else {
     loadPlayer();
-=======
->>>>>>> origin/main
   }
 };
 
@@ -325,16 +239,9 @@ const onPlayerStateChange = async (event: any) => {
   if (event.data === window.YT.PlayerState.ENDED) {
     if (songList.value.length === 0) return;
 
-<<<<<<< HEAD
     const playedSong = songList.value[0];
 
     try {
-=======
-    const playedSong = songList.value[0]; // Get the currently playing song
-
-    try {
-      // Fetch the current queue from Supabase
->>>>>>> origin/main
       let { data, error: fetchError } = await supabase
         .from("songs")
         .select("queue")
@@ -343,19 +250,11 @@ const onPlayerStateChange = async (event: any) => {
 
       if (fetchError) throw fetchError;
 
-<<<<<<< HEAD
-=======
-      // Filter out the played song from the queue
->>>>>>> origin/main
       const updatedQueue =
         data?.queue?.filter(
           (song: { video_id: string }) => song.video_id !== playedSong.video_id
         ) || [];
 
-<<<<<<< HEAD
-=======
-      // Update the queue in Supabase
->>>>>>> origin/main
       const { error: updateError } = await supabase
         .from("songs")
         .update({ queue: updatedQueue })
@@ -363,32 +262,15 @@ const onPlayerStateChange = async (event: any) => {
 
       if (updateError) throw updateError;
 
-<<<<<<< HEAD
       songList.value = updatedQueue;
       if (songList.value.length > 0) playSong(0);
-=======
-      console.log(`Song "${playedSong.title}" removed from queue.`);
-
-      // Update local queue
-      songList.value = updatedQueue;
-
-      // Play next song (if available)
-      if (songList.value.length > 0) {
-        playSong(0);
-      } else {
-        console.warn("No more songs in the queue.");
-      }
->>>>>>> origin/main
     } catch (error: any) {
       console.error("Error updating queue in DB:", error.message);
     }
   }
 };
-<<<<<<< HEAD
 
 const currentSong = computed(
   () => songList.value[currentVideoIndex.value] || null
 );
-=======
->>>>>>> origin/main
 </script>
