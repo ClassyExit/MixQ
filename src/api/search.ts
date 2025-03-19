@@ -1,28 +1,24 @@
-import YTMusic from "ytmusic-api";
+// api/search.ts
+export async function searchMusicAPI(query: string) {
+  const urls = [
+    `https://tmdb-backend.herokuapp.com/api/song/search?q=${encodeURIComponent(
+      query
+    )}`,
+    `https://tmdb-backend.autoidleapp.com/api/song/search?q=${encodeURIComponent(
+      query
+    )}`,
+  ];
 
-// Corrected async search function
-export async function search(query: string) {
-  try {
-    if (!query) return [];
-
-    // Initialize YTMusic instance
-    const ytmusic = new YTMusic();
-    await ytmusic.initialize();
-
-    // Perform search
-    const songs = await ytmusic.search(query);
-
-    // Filter to only include "SONG" types and map the result to a simplified structure
-    const results = songs
-      .filter((result) => result.type === "SONG") // Filter only songs
-      .map((result) => ({
-        video_id: result.videoId, // Access videoId only for SONG type
-        title: `${result.artist.name} - ${result.name}`,
-      }));
-
-    return results; // Return the formatted results
-  } catch (error) {
-    console.error("Search error:", error);
-    return []; // Return an empty array on error
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.error(`Fetch error: ${error} on ${url}`);
+    }
   }
+
+  return []; // Return empty array if all requests fail
 }
