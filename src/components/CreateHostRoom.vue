@@ -2,7 +2,7 @@
   <div
     class="flex flex-col mt-4 md:flex-row items-center justify-center space-x-0 md:space-x-4"
   >
-    <div v-if="isCreatingRoom" class="">
+    <div v-if="isCreatingRoom">
       <span class="loading text-primary loading-ring loading-md"></span>
       <div class="animate-pulse">Creating room...</div>
     </div>
@@ -37,38 +37,47 @@ function generateId(): string {
 }
 
 const isCreatingRoom = ref(false);
-let errorCreatingRoom = ref("Hello");
+const errorCreatingRoom = ref("");
 
 const createHostRoom = async () => {
-  const roomId = generateId(); // Generate unique room ID
+  const roomId = generateId();
   isCreatingRoom.value = true;
   errorCreatingRoom.value = "";
 
-  // Calculate expiration time (1 day from now)
   const expireAt = new Date();
-  expireAt.setDate(expireAt.getDate() + 1); // Add 1 day
+  expireAt.setDate(expireAt.getDate() + 1); // Expires after 1 day
 
-  // Insert room data into Supabase
-  const { error } = await supabase.from("room").insert([
-    {
-      code: roomId,
-      created_at: new Date().toISOString(),
-      expire_at: expireAt.toISOString(), // Now expires after 1 day
-      max_song_per_user: 5,
-    },
-  ]);
+  try {
+    // Insert into "room" table
+    const { error: roomError } = await supabase.from("room").insert([
+      {
+        code: roomId,
+        created_at: new Date().toISOString(),
+        expire_at: expireAt.toISOString(),
+        max_song_per_user: 5,
+      },
+    ]);
 
-  if (error) {
+    if (roomError) throw roomError;
+
+    // Insert into "song_queue" table
+    const { error: queueError } = await supabase.from("song_queue").insert([
+      {
+        code: roomId,
+        queue: [],
+        expire_at: expireAt.toISOString(),
+      },
+    ]);
+
+    if (queueError) throw queueError;
+
+    showNotification("Created room", "success", 3000);
+    router.push({ name: "Host", params: { id: roomId } });
+  } catch (error: any) {
     errorCreatingRoom.value = error.message;
     showNotification("Error creating room. Please try again", "error", 3000);
+  } finally {
     isCreatingRoom.value = false;
-    return;
   }
-
-  isCreatingRoom.value = false;
-
-  showNotification("Created room", "success", 3000);
-  // Redirect to host room page
-  router.push({ name: "Host", params: { id: roomId } });
 };
 </script>
