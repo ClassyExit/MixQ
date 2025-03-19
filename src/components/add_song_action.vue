@@ -45,7 +45,11 @@ const addSong = async () => {
       .from("songs")
       .select("queue")
       .eq("code", props.code)
+<<<<<<< HEAD
+      .maybeSingle();
+=======
       .single();
+>>>>>>> origin/main
 
     if (fetchError) throw fetchError;
 

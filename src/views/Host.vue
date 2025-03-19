@@ -3,6 +3,39 @@
     class="w-full md:h-screen bg-base-200 flex flex-col space-y-4 md:space-y-0 p-4 md:flex-row md:justify-between space-x-0 md:space-x-4"
   >
     <div class="flex flex-col h-full md:w-8/12 rounded space-y-4">
+<<<<<<< HEAD
+      <div class="flex flex-row text-3xl items-center space-x-2">
+        <router-link class="w-fit" :to="{ name: 'Home' }"> MixQ </router-link>
+      </div>
+
+      <div class="bg-base-200 flex-1">
+        <div :class="containerClass">
+          <!-- Show thumbnail if the player hasn't loaded -->
+          <div
+            v-if="!showPlayer"
+            class="relative w-full h-full cursor-pointer"
+            @click="loadPlayer"
+          >
+            <button
+              class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-3xl"
+            >
+              ▶
+            </button>
+          </div>
+
+          <!-- YouTube Player -->
+          <div v-else id="player" class="w-full h-full"></div>
+        </div>
+      </div>
+
+      <div
+        v-if="currentSong"
+        class="flex flex-row text-lg items-center space-x-2 rounded shadow-md"
+      >
+        <div class="font-semibold">
+          Current:
+          <span class="text-primary"> {{ currentSong.title }}</span>
+=======
       <router-link class="text-3xl w-fit" :to="{ name: 'Home' }">
         MixQ
       </router-link>
@@ -10,6 +43,7 @@
       <div class="bg-base-100 flex-1">
         <div :class="containerClass">
           <div id="player" class="w-full h-full"></div>
+>>>>>>> origin/main
         </div>
       </div>
     </div>
@@ -35,10 +69,12 @@
           >
             <div>
               <img
+                v-if="song.thumbnail"
                 class="size-10 rounded-box"
                 :src="song.thumbnail"
                 alt="thumbnail"
               />
+              <div v-else class="size-10 rounded-box bg-gray-400"></div>
             </div>
             <div class="flex flex-col">
               <div>{{ song.title }}</div>
@@ -72,7 +108,11 @@
 </template>
 
 <script setup lang="ts">
+<<<<<<< HEAD
+import { ref, onMounted, computed, provide, onUnmounted } from "vue";
+=======
 import { ref, onMounted, computed, provide } from "vue";
+>>>>>>> origin/main
 import { useRouter } from "vue-router";
 import { supabase } from "../utils/supabase";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
@@ -82,6 +122,69 @@ import delete_song_action from "../components/delete_song_action.vue";
 const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
 const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId}`;
+<<<<<<< HEAD
+let queueSubscription: any = null; // Store the channel reference
+
+// YouTube Player
+let player: any = null;
+const showPlayer = ref(false);
+
+const containerClass = computed(() => {
+  return "h-[400px] sm:h-[400px] md:h-[400px] lg:h-[600px] xl:h-[800px] ";
+});
+
+// Queue - Initially Empty and fetch songs from DB
+const songList: any = ref([]);
+const currentVideoIndex = ref(0);
+
+// Provide songList & playSong globally
+provide("songList", songList);
+provide("playSong", (index: number) => playSong(index));
+
+const fetchSongs = async () => {
+  const { data, error } = await supabase
+    .from("songs")
+    .select("queue")
+    .eq("code", roomId.value)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching song queue:", error);
+    return;
+  }
+
+  if (data && data.queue) {
+    songList.value = Array.isArray(data.queue)
+      ? data.queue
+      : JSON.parse(data.queue);
+  }
+};
+
+// **Subscribe to Realtime Updates**
+const subscribeToQueueUpdates = () => {
+  queueSubscription = supabase
+    .channel(`room-queue-updates-${roomId.value}`) // Store reference
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "songs",
+        filter: `code=eq.${roomId.value}`,
+      },
+      (payload) => {
+        console.log("Queue updated!", payload.new.queue);
+        songList.value = payload.new.queue;
+      }
+    )
+    .subscribe();
+};
+// Load YouTube API
+onMounted(async () => {
+  await fetchSongs();
+  subscribeToQueueUpdates();
+
+=======
 
 // YouTube Player
 let player: any = null;
@@ -130,6 +233,7 @@ const fetchSongs = async () => {
 onMounted(async () => {
   await fetchSongs(); // Fetch songs first
 
+>>>>>>> origin/main
   if (songList.value.length === 0) {
     console.warn(
       "No songs found in queue, YouTube player will not initialize."
@@ -142,6 +246,46 @@ onMounted(async () => {
   document.body.appendChild(tag);
 
   window.onYouTubeIframeAPIReady = () => {
+<<<<<<< HEAD
+    initializePlayer();
+  };
+});
+
+onUnmounted(() => {
+  if (queueSubscription) {
+    supabase.removeChannel(queueSubscription); // Pass the stored channel instance
+  }
+});
+
+// Function to initialize player
+const initializePlayer = () => {
+  player = new window.YT.Player("player", {
+    height: "360",
+    width: "640",
+    videoId: songList.value[currentVideoIndex.value].video_id,
+    playerVars: {
+      autoplay: 1,
+      controls: 0, // No controls
+      modestbranding: 1, // Hide YouTube branding
+      rel: 0, // Prevent related videos
+      showinfo: 0, // Hide video info
+      iv_load_policy: 3, // Hide annotations
+    },
+    events: {
+      onStateChange: onPlayerStateChange,
+    },
+  });
+};
+
+// Function to show player when thumbnail is clicked
+const loadPlayer = () => {
+  showPlayer.value = true;
+  setTimeout(() => {
+    initializePlayer();
+  }, 500);
+};
+
+=======
     player = new window.YT.Player("player", {
       height: "360",
       width: "640",
@@ -157,6 +301,7 @@ onMounted(async () => {
   };
 });
 
+>>>>>>> origin/main
 // Function to Play Song from Queue
 const playSong = (index: number) => {
   if (!songList.value.length || !songList.value[index]) {
@@ -167,6 +312,11 @@ const playSong = (index: number) => {
   currentVideoIndex.value = index;
   if (player) {
     player.loadVideoById(songList.value[index].video_id);
+<<<<<<< HEAD
+  } else {
+    loadPlayer();
+=======
+>>>>>>> origin/main
   }
 };
 
@@ -175,10 +325,16 @@ const onPlayerStateChange = async (event: any) => {
   if (event.data === window.YT.PlayerState.ENDED) {
     if (songList.value.length === 0) return;
 
+<<<<<<< HEAD
+    const playedSong = songList.value[0];
+
+    try {
+=======
     const playedSong = songList.value[0]; // Get the currently playing song
 
     try {
       // Fetch the current queue from Supabase
+>>>>>>> origin/main
       let { data, error: fetchError } = await supabase
         .from("songs")
         .select("queue")
@@ -187,13 +343,19 @@ const onPlayerStateChange = async (event: any) => {
 
       if (fetchError) throw fetchError;
 
+<<<<<<< HEAD
+=======
       // Filter out the played song from the queue
+>>>>>>> origin/main
       const updatedQueue =
         data?.queue?.filter(
           (song: { video_id: string }) => song.video_id !== playedSong.video_id
         ) || [];
 
+<<<<<<< HEAD
+=======
       // Update the queue in Supabase
+>>>>>>> origin/main
       const { error: updateError } = await supabase
         .from("songs")
         .update({ queue: updatedQueue })
@@ -201,6 +363,10 @@ const onPlayerStateChange = async (event: any) => {
 
       if (updateError) throw updateError;
 
+<<<<<<< HEAD
+      songList.value = updatedQueue;
+      if (songList.value.length > 0) playSong(0);
+=======
       console.log(`Song "${playedSong.title}" removed from queue.`);
 
       // Update local queue
@@ -212,9 +378,17 @@ const onPlayerStateChange = async (event: any) => {
       } else {
         console.warn("No more songs in the queue.");
       }
+>>>>>>> origin/main
     } catch (error: any) {
       console.error("Error updating queue in DB:", error.message);
     }
   }
 };
+<<<<<<< HEAD
+
+const currentSong = computed(
+  () => songList.value[currentVideoIndex.value] || null
+);
+=======
+>>>>>>> origin/main
 </script>
