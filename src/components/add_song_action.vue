@@ -45,11 +45,7 @@ const addSong = async () => {
       .from("songs")
       .select("queue")
       .eq("code", props.code)
-<<<<<<< HEAD
       .maybeSingle();
-=======
-      .single();
->>>>>>> origin/main
 
     if (fetchError) throw fetchError;
 
@@ -70,7 +66,7 @@ const addSong = async () => {
     // Update database with new queue (MUST BE JSON OBJECT, NOT STRING)
     const { error: updateError } = await supabase
       .from("songs")
-      .update({ queue: updatedQueue }) // ✅ Directly update JSONB column
+      .update({ queue: updatedQueue }) //Directly update JSONB column
       .eq("code", props.code);
 
     if (updateError) throw updateError;
