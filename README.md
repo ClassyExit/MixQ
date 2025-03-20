@@ -1,5 +1,20 @@
-# Vue 3 + TypeScript + Vite
+# MixQ
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+MixQ is a web application that allows users to host or join a room to share and play music collaboratively. Users can search for songs and add them to a shared queue.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Features
+
+- **Create & Join Rooms**: Users can create a unique room or join an existing one.
+- **Music Search & Add**: Search for songs and add them to the queue.
+- **Real-time Queue**: Songs are played in a shared queue, synced across all users.
+- **Responsive Design**: Works seamlessly on desktop and mobile devices.
+
+## Tech Stack
+
+- **Frontend**: Vue 3 + Vite
+- **Backend**: Firebase Functions & Supabase
+- **Database**: Supabase PostgreSQL
+
+## License
+
+MIT License
