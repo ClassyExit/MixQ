@@ -98,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, provide, onUnmounted } from "vue";
+import { ref, onMounted, computed, provide, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../utils/supabase";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
@@ -183,6 +183,13 @@ onMounted(async () => {
   window.onYouTubeIframeAPIReady = () => {
     initializePlayer();
   };
+});
+
+// Watch for changes in the song queue if player not initialized initally
+watch(songList, (newList) => {
+  if (newList.length > 0 && !player) {
+    loadPlayer(); // Initialize player when first song is added
+  }
 });
 
 onUnmounted(() => {
