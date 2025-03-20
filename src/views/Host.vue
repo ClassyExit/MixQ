@@ -107,7 +107,7 @@ import delete_song_action from "../components/delete_song_action.vue";
 // Router setup
 const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
-const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId}`;
+const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId.value}`;
 let queueSubscription: any = null; // Store the channel reference
 
 // YouTube Player
