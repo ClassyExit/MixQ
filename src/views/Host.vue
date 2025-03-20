@@ -113,6 +113,7 @@ let queueSubscription: any = null; // Store the channel reference
 // YouTube Player
 let player: any = null;
 const showPlayer = ref(false);
+const isYouTubeAPILoaded = ref(false); // Track if API has loaded
 
 const containerClass = computed(() => {
   return "h-[400px] sm:h-[400px] md:h-[400px] lg:h-[600px] xl:h-[800px] ";
@@ -164,15 +165,10 @@ const subscribeToQueueUpdates = () => {
     )
     .subscribe();
 };
-// Load YouTube API
-onMounted(async () => {
-  await fetchSongs();
-  subscribeToQueueUpdates();
 
-  if (songList.value.length === 0) {
-    console.warn(
-      "No songs found in queue, YouTube player will not initialize."
-    );
+const loadYouTubeAPI = () => {
+  if (window.YT && window.YT.Player) {
+    isYouTubeAPILoaded.value = true;
     return;
   }
 
@@ -181,14 +177,45 @@ onMounted(async () => {
   document.body.appendChild(tag);
 
   window.onYouTubeIframeAPIReady = () => {
-    initializePlayer();
+    isYouTubeAPILoaded.value = true;
   };
+};
+
+// onMounted: Load YouTube API and fetch songs
+onMounted(async () => {
+  loadYouTubeAPI(); // Start loading YouTube API
+  await fetchSongs();
+  subscribeToQueueUpdates();
+
+  showPlayer.value = true;
+  if (!isYouTubeAPILoaded.value) await waitForYouTubeAPI();
+  initializePlayer();
 });
 
-// Watch for changes in the song queue if player not initialized initally
-watch(songList, (newList) => {
+// Function to wait for YouTube API
+const waitForYouTubeAPI = () => {
+  return new Promise((resolve) => {
+    const checkAPI = setInterval(() => {
+      if (window.YT && window.YT.Player) {
+        clearInterval(checkAPI);
+        isYouTubeAPILoaded.value = true;
+        resolve(true);
+      }
+    }, 200);
+  });
+};
+
+// Watch for changes in the song queue
+watch(songList, async (newList) => {
   if (newList.length > 0 && !player) {
-    loadPlayer(); // Initialize player when first song is added
+    showPlayer.value = true; // Show the player UI
+
+    // Ensure YouTube API is loaded before initializing the player
+    if (!isYouTubeAPILoaded.value) {
+      console.warn("YouTube API not yet loaded. Waiting...");
+      await waitForYouTubeAPI(); // Wait before initializing
+    }
+
     initializePlayer();
   }
 });
