@@ -189,6 +189,7 @@ onMounted(async () => {
 watch(songList, (newList) => {
   if (newList.length > 0 && !player) {
     loadPlayer(); // Initialize player when first song is added
+    initializePlayer();
   }
 });
 
