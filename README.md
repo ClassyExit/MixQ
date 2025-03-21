@@ -14,7 +14,7 @@ MixQ is a web application that allows users to host or join a room to share and 
 ## Tech Stack
 
 - **Frontend**: Vue 3 + Vite
-- **Backend**: Firebase Functions & Supabase
+- **Backend**: Supabase
 - **Database**: Supabase PostgreSQL
 
 ## License
