@@ -68,18 +68,18 @@ const deleteSong = async () => {
     // Update local song list
     songList.value = updatedQueue;
 
-    // Play the next song if the current song is being deleted
-    if (
-      updatedQueue.length > 0 &&
-      updatedQueue[0].video_id !== props.video_id
-    ) {
+    // Only play the next song if the currently playing song is deleted
+    const currentPlayingVideoId = songList.value.length
+      ? songList.value[0].video_id
+      : null;
+
+    if (props.video_id === currentPlayingVideoId) {
       playSong(0);
     }
 
-    showNotification("Song removed from queue", "success");
+    showNotification("Song removed", "success");
   } catch (error: any) {
-    console.error("Error deleting song:", error.message);
-    showNotification("Failed to delete song", "error");
+    showNotification("Failed to remove song", "error");
   } finally {
     loading.value = false;
   }

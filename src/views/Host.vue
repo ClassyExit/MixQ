@@ -4,7 +4,28 @@
   >
     <div class="flex flex-col h-full md:w-8/12 rounded space-y-4">
       <div class="flex flex-row text-3xl items-center space-x-2">
-        <router-link class="w-fit" :to="{ name: 'Home' }"> MixQ </router-link>
+        <router-link
+          class="w-fit font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+          :to="{ name: 'Home' }"
+        >
+          MixQ
+        </router-link>
+
+        <transition name="slide-fade">
+          <div
+            v-if="currentSong"
+            class="flex flex-row items-center justify-center w-full space-x-2"
+          >
+            <img
+              src="../assets/images/audio-visualizer.svg"
+              alt="audio-visualizer"
+              class="size-10 md:size-12 lg:size-14 scale-150 lg:scale-200 rounded-box flex items-center justify-center pl-4"
+            />
+            <div class="flex flex-col">
+              <div>{{ currentSong.title }}</div>
+            </div>
+          </div>
+        </transition>
       </div>
 
       <div class="bg-base-200 flex-1">
@@ -25,22 +46,6 @@
           <!-- YouTube Player -->
           <div v-else id="player" class="w-full h-full"></div>
         </div>
-        <div
-          v-if="currentSong"
-          class="flex flex-row text-lg md:text-3xl lg:text-4xl items-center space-x-2 rounded shadow-md"
-        >
-          <img
-            src="../assets/images/audio-visualizer.svg"
-            alt="audio-visualizer"
-            class="size-10 md:size-12 lg:size-14 scale-150 lg:scale-200 rounded-box flex items-center justify-center pl-4"
-          />
-          <div class="flex flex-col">
-            <div>{{ currentSong.title }}</div>
-            <div class="text-xs uppercase font-semibold opacity-60">
-              {{ currentSong.duration }}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -56,38 +61,40 @@
           <li v-if="!songList.length" class="p-4 text-xl">
             No songs in queue.
           </li>
-          <li
-            v-else
-            v-for="(song, index) in songList"
-            :key="song.video_id"
-            class="list-row cursor-pointer"
-            @click="playSong(index)"
-          >
-            <div>
-              <img
-                :class="
-                  imgError
-                    ? 'size-10 rounded-box bg-gray-400'
-                    : 'size-10 rounded-box'
-                "
-                :src="song.thumbnail"
-                alt="thumbnail"
-                @error="handleImageError"
-              />
-            </div>
-            <div class="flex flex-col">
-              <div>{{ song.title }}</div>
-              <div class="text-xs uppercase font-semibold opacity-60">
-                {{ song.duration }}
-              </div>
-            </div>
 
-            <delete_song_action
-              :video_id="song.video_id"
-              :code="roomId"
-              @click.stop
-            />
-          </li>
+          <transition-group name="slide">
+            <li
+              v-for="(song, index) in songList"
+              :key="song.video_id"
+              class="list-row cursor-pointer"
+              @click="playSong(index)"
+            >
+              <div>
+                <img
+                  :class="
+                    imgError
+                      ? 'size-10 rounded-box bg-gray-400'
+                      : 'size-10 rounded-box'
+                  "
+                  :src="song.thumbnail"
+                  alt="thumbnail"
+                  @error="handleImageError"
+                />
+              </div>
+              <div class="flex flex-col">
+                <div>{{ song.title }}</div>
+                <div class="text-xs uppercase font-semibold opacity-60">
+                  {{ song.duration }}
+                </div>
+              </div>
+
+              <delete_song_action
+                :video_id="song.video_id"
+                :code="roomId"
+                @click.stop
+              />
+            </li>
+          </transition-group>
         </ul>
       </div>
       <div class="md:h-1/2 bg-base-100 rounded p-4 space-y-4">
@@ -144,14 +151,6 @@ const containerClass = computed(() => {
 // Queue - Initially Empty and fetch songs from DB
 const songList: any = ref([]);
 const currentVideoIndex = ref(0);
-
-interface Song {
-  video_id: string;
-  title: string;
-  duration: string;
-  thumbnail: string;
-}
-
 const currentSong = ref<Song | null>(null);
 
 // Provide songList & playSong globally
@@ -356,3 +355,55 @@ const removeCurrentSongFromQueue = async () => {
   }
 };
 </script>
+
+<style scoped>
+/* Enter Animation */
+.slide-enter-active {
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+.slide-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-enter-to {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Leave Animation */
+.slide-leave-active {
+  transition: transform 0.3s ease-in, opacity 0.3s ease-in;
+}
+.slide-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+.slide-fade-enter-from {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+.slide-fade-enter-to {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.slide-fade-leave-active {
+  transition: transform 0.3s ease-in, opacity 0.3s ease-in;
+}
+.slide-fade-leave-from {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide-fade-leave-to {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+</style>

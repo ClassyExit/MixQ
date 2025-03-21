@@ -146,7 +146,7 @@ const searchMusic = async () => {
     const results = await searchMusicAPI(searchQuery.value);
     searchResults.value = results || [];
   } catch (error) {
-    showNotification("Failed to search music", "error");
+    showNotification("Failed to get results", "error");
     searchResults.value = []; // Ensure state resets on failure
   } finally {
     loading.value = false;
