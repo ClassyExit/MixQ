@@ -59,21 +59,33 @@
           >
             <div>
               <img
-                v-if="song.thumbnail"
-                class="size-10 rounded-box"
+                :class="
+                  imgError
+                    ? 'size-10 rounded-box bg-gray-400'
+                    : 'size-10 rounded-box'
+                "
                 :src="song.thumbnail"
                 alt="thumbnail"
+                @error="handleImageError"
               />
-              <div v-else class="size-10 rounded-box bg-gray-400"></div>
             </div>
-            <div class="flex flex-col">
+            <div
+              class="flex flex-col"
+              :class="
+                currentSong.video_id === song.video_id ? 'text-success' : ''
+              "
+            >
               <div>{{ song.title }}</div>
               <div class="text-xs uppercase font-semibold opacity-60">
                 {{ song.duration }}
               </div>
             </div>
 
-            <delete_song_action :video_id="song.video_id" :code="roomId" />
+            <delete_song_action
+              :video_id="song.video_id"
+              :code="roomId"
+              @click.stop
+            />
           </li>
         </ul>
       </div>
@@ -103,12 +115,21 @@ import { useRouter } from "vue-router";
 import { supabase } from "../utils/supabase";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
 import delete_song_action from "../components/delete_song_action.vue";
+import { showNotification } from "../utils/notifications";
 
 // Router setup
 const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
 const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId.value}`;
 let queueSubscription: any = null; // Store the channel reference
+
+// Image Error Handling
+const imgError = ref(false);
+
+const handleImageError = (event: any) => {
+  imgError.value = true; // Apply error state
+  event.target.src = ""; // Hide broken image
+};
 
 // YouTube Player
 let player: any = null;
@@ -135,7 +156,7 @@ const fetchSongs = async () => {
     .maybeSingle();
 
   if (error) {
-    console.error("Error fetching song queue:", error);
+    showNotification("Failed to get songs", "error");
     return;
   }
 
@@ -146,7 +167,7 @@ const fetchSongs = async () => {
   }
 };
 
-// **Subscribe to Realtime Updates**
+// Subscribe to Realtime Updates
 const subscribeToQueueUpdates = () => {
   queueSubscription = supabase
     .channel(`room-queue-updates-${roomId.value}`) // Store reference
@@ -181,7 +202,23 @@ const loadYouTubeAPI = () => {
   };
 };
 
-// onMounted: Load YouTube API and fetch songs
+// Function to wait for YouTube API
+const waitForYouTubeAPI = () => {
+  if (window.YT && window.YT.Player) return Promise.resolve(true);
+
+  return new Promise((resolve) => {
+    const checkAPI = () => {
+      if (window.YT && window.YT.Player) {
+        resolve(true);
+      } else {
+        requestAnimationFrame(checkAPI);
+      }
+    };
+    checkAPI();
+  });
+};
+
+// Load YouTube API and fetch songs
 onMounted(async () => {
   loadYouTubeAPI(); // Start loading YouTube API
   await fetchSongs();
@@ -192,18 +229,11 @@ onMounted(async () => {
   initializePlayer();
 });
 
-// Function to wait for YouTube API
-const waitForYouTubeAPI = () => {
-  return new Promise((resolve) => {
-    const checkAPI = setInterval(() => {
-      if (window.YT && window.YT.Player) {
-        clearInterval(checkAPI);
-        isYouTubeAPILoaded.value = true;
-        resolve(true);
-      }
-    }, 200);
-  });
-};
+onUnmounted(() => {
+  if (queueSubscription) {
+    supabase.removeChannel(queueSubscription); // Pass the stored channel instance
+  }
+});
 
 // Watch for changes in the song queue
 watch(songList, async (newList) => {
@@ -220,13 +250,7 @@ watch(songList, async (newList) => {
   }
 });
 
-onUnmounted(() => {
-  if (queueSubscription) {
-    supabase.removeChannel(queueSubscription); // Pass the stored channel instance
-  }
-});
-
-// Function to initialize player
+// Function to initialize yt player
 const initializePlayer = () => {
   player = new window.YT.Player("player", {
     height: "360",
@@ -271,10 +295,14 @@ const playSong = (index: number) => {
 
 // Auto play and handle delete from queue
 const onPlayerStateChange = async (event: any) => {
-  if (event.data === window.YT.PlayerState.ENDED) {
-    if (songList.value.length === 0) return;
-
-    const playedSong = songList.value[0];
+  if (
+    event.data === window.YT.PlayerState.ENDED ||
+    event.data === window.YT.PlayerState.PLAYING
+  ) {
+    if (songList.value.length === 0) {
+      player.stopVideo(); // Stop playback if queue is empty
+      return;
+    }
 
     try {
       let { data, error: fetchError } = await supabase
@@ -287,7 +315,8 @@ const onPlayerStateChange = async (event: any) => {
 
       const updatedQueue =
         data?.queue?.filter(
-          (song: { video_id: string }) => song.video_id !== playedSong.video_id
+          (song: { video_id: string }) =>
+            song.video_id !== currentSong.value?.video_id
         ) || [];
 
       const { error: updateError } = await supabase
@@ -298,7 +327,19 @@ const onPlayerStateChange = async (event: any) => {
       if (updateError) throw updateError;
 
       songList.value = updatedQueue;
-      if (songList.value.length > 0) playSong(0);
+
+      // If the current song was deleted, stop playback or move to the next song
+      if (
+        !updatedQueue.some(
+          (song: any) => song.video_id === currentSong.value?.video_id
+        )
+      ) {
+        if (updatedQueue.length > 0) {
+          playSong(0); // Play the next song in queue
+        } else {
+          player.stopVideo(); // No songs left, stop the player
+        }
+      }
     } catch (error: any) {
       console.error("Error updating queue in DB:", error.message);
     }

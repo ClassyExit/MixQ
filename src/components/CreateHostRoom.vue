@@ -6,12 +6,13 @@
       <span class="loading text-primary loading-ring loading-md"></span>
       <div class="animate-pulse">Creating room...</div>
     </div>
+
     <button
       v-else
       @click="createHostRoom"
-      class="btn btn-primary text-primary-content px-6 py-3 rounded-lg text-lg"
+      class="cursor-pointer bg-primary hover:scale-105 transition-transform duration-300 px-6 py-3 rounded-xl shadow-lg"
     >
-      Host a Room
+      Create Room 🎶
     </button>
   </div>
 </template>
@@ -37,18 +38,16 @@ function generateId(): string {
 }
 
 const isCreatingRoom = ref(false);
-const errorCreatingRoom = ref("");
 
 const createHostRoom = async () => {
   const roomId = generateId();
   isCreatingRoom.value = true;
-  errorCreatingRoom.value = "";
 
   const expireAt = new Date();
   expireAt.setDate(expireAt.getDate() + 1); // Expires after 1 day
 
   try {
-    // Insert into "room" table
+    // Create the host room
     const { error: roomError } = await supabase.from("room").insert([
       {
         code: roomId,
@@ -58,9 +57,9 @@ const createHostRoom = async () => {
       },
     ]);
 
-    if (roomError) throw roomError;
+    if (roomError) showNotification(roomError.message, "error", 3000);
 
-    // Insert into "song_queue" table
+    // Create songs queue for the room
     const { error: queueError } = await supabase.from("songs").insert([
       {
         code: roomId,
@@ -69,12 +68,11 @@ const createHostRoom = async () => {
       },
     ]);
 
-    if (queueError) throw queueError;
+    if (queueError) showNotification(queueError.message, "error", 3000);
 
     showNotification("Created room", "success", 3000);
     router.push({ name: "Host", params: { id: roomId } });
   } catch (error: any) {
-    errorCreatingRoom.value = error.message;
     showNotification("Error creating room. Please try again", "error", 3000);
   } finally {
     isCreatingRoom.value = false;

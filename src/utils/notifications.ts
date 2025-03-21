@@ -36,7 +36,7 @@ export function showNotification(
   notification.id = notificationId;
   notification.className = `p-4 rounded-lg shadow-lg flex items-center space-x-2 transition-opacity duration-300`;
 
-  // Apply styles dynamically using CSS variables
+  // Apply styles
   notification.style.backgroundColor = alerts[type].bgColor;
   notification.style.color = alerts[type].textColor;
 
@@ -44,7 +44,6 @@ export function showNotification(
   notification.innerHTML = `
     <span class="h-6 w-6">${alerts[type].icon}</span>
     <span>${message}</span>
-    <button onclick="document.getElementById('${notificationId}')?.remove()" class="ml-2 text-gray-400 hover:text-white"></button>
   `;
 
   // Append to container

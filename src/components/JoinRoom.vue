@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div>
     <div v-if="isCheckingRoom" class="">
       <span class="loading text-primary loading-ring loading-md"></span>
       <div class="animate-pulse">Finding room...</div>
@@ -7,7 +7,12 @@
 
     <div v-else class="indicator">
       <div class="indicator-item indicator-bottom">
-        <button @click="joinRoom()" class="btn btn-secondary">Join</button>
+        <button
+          @click="joinRoom()"
+          class="btn btn-secondary hover:scale-105 transition-transform duration-300"
+        >
+          Join 🔗
+        </button>
       </div>
       <div class="card border border-base-300 bg-base-100 shadow-sm">
         <div class="card-body">
@@ -38,9 +43,7 @@ const roomCode = ref("");
 const isCheckingRoom = ref(false);
 
 const joinRoom = async () => {
-  if (!roomCode.value) {
-    return;
-  }
+  if (!roomCode.value) return;
 
   isCheckingRoom.value = true;
 
@@ -62,7 +65,7 @@ const joinRoom = async () => {
   }
 
   isCheckingRoom.value = false;
-  // Redirect to room page
+  // Redirect to host room
   router.push({ name: "Host", params: { id: data.code } });
 };
 </script>

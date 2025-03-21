@@ -1,124 +1,98 @@
 <template>
-  <div class="bg-base-200 mx-auto flex-1 min-h-screen p-6">
+  <div
+    class="bg-base-200 min-h-screen flex flex-col items-center p-6 landing-page"
+  >
     <!-- Hero Section -->
-    <section class="flex flex-col items-center justify-center text-center p-6">
-      <h1 class="text-5xl font-bold mb-4">MixQ</h1>
-      <p class="text-lg text-gray-300 max-w-xl">
+    <section class="text-center space-y-4 py-12">
+      <h1
+        class="text-6xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+      >
+        MixQ
+      </h1>
+      <p class="text-lg text-gray-300 max-w-2xl mx-auto">
         Host or join a room to share and discover music in real time. Find songs
-        on your device and let the vibes flow.
+        on your device and let the vibes flow. 👇
       </p>
     </section>
 
-    <div class="flex flex-col items-center justify-center p-6 space-y-4">
-      <div class="flex flex-row space-x-2 items-center justify-center">
-        <h1
-          class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
-        >
-          Get Started
-        </h1>
-      </div>
-      <div
-        class="flex flex-col md:flex-row items-center justify-center space-x-0 md:space-x-4"
-      >
+    <!-- Get Started Section -->
+    <section class="w-full max-w-3xl flex flex-col items-center space-y-6">
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6">
         <CreateHostRoom />
-
-        <div class="divider md:divider-horizontal py-4 px-4">OR</div>
-
+        <span class="divider-horizontal text-xl font-bold">OR</span>
         <JoinRoom />
       </div>
-    </div>
+    </section>
 
-    <div class="flex flex-col items-center justify-center p-6 space-y-4">
-      <div class="relative flex flex-col items-start space-y-10 pl-6">
-        <!-- Vertical border -->
-        <div class="absolute left-0 top-0 w-1 bg-primary h-full"></div>
+    <!-- How It Works Section -->
+    <section class="hidden w-full max-w-4xl mt-16 space-y-12">
+      <div class="relative flex flex-col space-y-10">
+        <!-- Timeline Line -->
+        <div class="absolute left-4 top-0 h-full w-1 bg-primary"></div>
 
-        <!-- Timeline Item 1 -->
-        <div class="relative flex items-center space-x-6">
-          <!-- Dot -->
-          <div
-            class="absolute animate-ping -left-3 w-2 h-2 bg-primary rounded-full"
-          ></div>
-          <!-- Image -->
+        <!-- QR Code Feature -->
+        <div class="flex items-center space-x-6">
+          <div class="relative w-6 h-6 bg-primary rounded-full -ml-3"></div>
           <img
             src="../assets/images/QRCode.png"
             alt="QR Code"
-            class="hidden md:flex w-32 h-32 object-contain rounded-lg shadow-md"
+            class="hidden md:block w-32 h-32 rounded-lg shadow-lg"
           />
-          <!-- Content -->
           <div>
-            <h2 class="text-xl font-bold text-content-base">QR Code</h2>
-            <p class="text-content-base text-left opacity-80 max-w-xl">
-              Once you are in the room, you can scan the QR code to add songs to
-              the queue!
+            <h3 class="text-2xl font-semibold">QR Code</h3>
+            <p class="text-gray-400 max-w-lg">
+              Once you are in the room, scan the QR code to add songs to the
+              queue effortlessly.
             </p>
           </div>
         </div>
 
-        <!-- Timeline Item 2 -->
-        <div class="relative flex items-center space-x-6">
-          <!-- Dot -->
-          <div
-            class="absolute animate-ping -left-3 w-2 h-2 bg-secondary rounded-full"
-          ></div>
-          <!-- Image -->
+        <!-- Queue Feature -->
+        <div class="flex items-center space-x-6">
+          <div class="relative w-6 h-6 bg-secondary rounded-full -ml-3"></div>
           <img
             src="../assets/images/Queue.png"
-            alt="Queue Image"
-            class="hidden md:flex w-32 h-32 object-contain rounded-lg shadow-md"
+            alt="Queue"
+            class="hidden md:block w-32 h-32 rounded-lg shadow-lg"
           />
-          <!-- Content -->
           <div>
-            <h2 class="text-xl font-bold text-content-base">Queue</h2>
-            <p class="text-content-base text-left opacity-80 max-w-xl">
-              Your songs will show up in the queue and will autoplay once the
-              song before it finishes.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Features Section -->
-    <section class="py-16 text-center">
-      <h2 class="text-3xl font-bold mb-6"></h2>
-      <div class="flex flex-wrap justify-center gap-8 max-w-8xl mx-auto">
-        <div class="card bg-base-100 w-96 shadow-sm">
-          <div class="card-body">
-            <h2 class="card-title">Collaborative Playlists 🤝</h2>
-            <p class="text-base-content text-left opacity-80">
-              Anyone with the room code can contribute to the queue, making it a
-              perfect tool for parties, study sessions, or casual hangouts.
-            </p>
-          </div>
-        </div>
-
-        <div class="card bg-base-100 w-96 shadow-sm">
-          <div class="card-body">
-            <h2 class="card-title">Instant Room Access 🔗</h2>
-            <p class="text-base-content text-left opacity-80">
-              Joining a music session is easier than ever. Simply scan a QR code
-              or enter a room code to start listening with others. No downloads
-              or sign-ups required!
-            </p>
-          </div>
-        </div>
-
-        <div class="card bg-base-100 w-96 shadow-sm">
-          <div class="card-body">
-            <h2 class="card-title">Queue Management 📋</h2>
-            <p class="text-base-content text-left opacity-80">
-              Effortlessly add and remove in real time. The queue updates
-              instantly for all listeners
+            <h3 class="text-2xl font-semibold">Queue</h3>
+            <p class="text-gray-400 max-w-lg">
+              Your songs will automatically play in sequence, ensuring a
+              seamless listening experience.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <footer class="py-6 text-center">
-      <p class="text-content-base">&copy; 2025 MixQ. All rights reserved.</p>
-    </footer>
+    <!-- Features Section -->
+    <section class="mt-16 w-full max-w-6xl text-center">
+      <h2 class="text-4xl font-bold mb-10">Why Choose MixQ?</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="card bg-base-100 shadow-lg p-6 rounded-xl">
+          <h3 class="text-xl font-bold">Collaborative Playlists 🤝</h3>
+          <p class="text-gray-400 mt-2">
+            Everyone with the room code can contribute, making it great for
+            parties, study sessions, or casual hangouts.
+          </p>
+        </div>
+        <div class="card bg-base-100 shadow-lg p-6 rounded-xl">
+          <h3 class="text-xl font-bold">Instant Room Access 🔗</h3>
+          <p class="text-gray-400 mt-2">
+            Join a room instantly by scanning a QR code or entering a code. No
+            downloads or sign-ups required!
+          </p>
+        </div>
+        <div class="card bg-base-100 shadow-lg p-6 rounded-xl">
+          <h3 class="text-xl font-bold">Queue Management 📋</h3>
+          <p class="text-gray-400 mt-2">
+            Effortlessly add and remove songs in real time. The queue updates
+            instantly for all listeners.
+          </p>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -127,4 +101,17 @@ import CreateHostRoom from "../components/CreateHostRoom.vue";
 import JoinRoom from "../components/JoinRoom.vue";
 </script>
 
-<style scoped></style>
+<style scoped>
+.card {
+  transition: transform 0.3s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.landing-page {
+  background-image: url("@/assets/images/background.svg");
+  background-size: cover;
+  background-position: center;
+}
+</style>

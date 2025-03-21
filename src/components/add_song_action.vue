@@ -5,7 +5,10 @@
     class="btn btn-sm ml-auto text-content-base"
     aria-label="Add Song"
   >
-    <span v-if="loading" class="loading loading-infinity loading-sm"></span>
+    <span
+      v-if="loading"
+      class="loading loading-spinner text-primary loading-sm"
+    ></span>
     <svg
       v-else
       xmlns="http://www.w3.org/2000/svg"
@@ -47,8 +50,6 @@ const addSong = async () => {
       .eq("code", props.code)
       .maybeSingle();
 
-    if (fetchError) throw fetchError;
-
     // Ensure queue is an array
     let existingQueue = Array.isArray(data?.queue) ? data.queue : [];
 
@@ -63,17 +64,16 @@ const addSong = async () => {
       },
     ];
 
-    // Update database with new queue (MUST BE JSON OBJECT, NOT STRING)
+    // Update database with new queue
     const { error: updateError } = await supabase
       .from("songs")
-      .update({ queue: updatedQueue }) //Directly update JSONB column
+      .update({ queue: updatedQueue })
       .eq("code", props.code);
 
-    if (updateError) throw updateError;
-
-    showNotification("Song added to queue", "success");
+    if (updateError || fetchError)
+      showNotification("Failed to add song", "error");
+    else showNotification("Song added to queue", "success");
   } catch (error: any) {
-    console.error("Error adding song:", error.message);
     showNotification("Failed to add song", "error");
   } finally {
     loading.value = false;

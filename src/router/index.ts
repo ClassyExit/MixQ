@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-// Import your views
 import Home from "../views/Home.vue";
 import Host from "../views/Host.vue";
 import Room from "../views/Room.vue";
