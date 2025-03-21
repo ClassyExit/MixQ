@@ -25,15 +25,21 @@
           <!-- YouTube Player -->
           <div v-else id="player" class="w-full h-full"></div>
         </div>
-      </div>
-
-      <div
-        v-if="currentSong"
-        class="flex flex-row text-lg items-center space-x-2 rounded shadow-md"
-      >
-        <div class="font-semibold">
-          Current:
-          <span class="text-primary"> {{ currentSong.title }}</span>
+        <div
+          v-if="currentSong"
+          class="flex flex-row text-lg md:text-3xl lg:text-4xl items-center space-x-2 rounded shadow-md"
+        >
+          <img
+            src="../assets/images/audio-visualizer.svg"
+            alt="audio-visualizer"
+            class="size-10 md:size-12 lg:size-14 scale-150 lg:scale-200 rounded-box flex items-center justify-center pl-4"
+          />
+          <div class="flex flex-col">
+            <div>{{ currentSong.title }}</div>
+            <div class="text-xs uppercase font-semibold opacity-60">
+              {{ currentSong.duration }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -69,12 +75,7 @@
                 @error="handleImageError"
               />
             </div>
-            <div
-              class="flex flex-col"
-              :class="
-                currentSong.video_id === song.video_id ? 'text-success' : ''
-              "
-            >
+            <div class="flex flex-col">
               <div>{{ song.title }}</div>
               <div class="text-xs uppercase font-semibold opacity-60">
                 {{ song.duration }}
@@ -143,6 +144,15 @@ const containerClass = computed(() => {
 // Queue - Initially Empty and fetch songs from DB
 const songList: any = ref([]);
 const currentVideoIndex = ref(0);
+
+interface Song {
+  video_id: string;
+  title: string;
+  duration: string;
+  thumbnail: string;
+}
+
+const currentSong = ref<Song | null>(null);
 
 // Provide songList & playSong globally
 provide("songList", songList);
@@ -295,58 +305,54 @@ const playSong = (index: number) => {
 
 // Auto play and handle delete from queue
 const onPlayerStateChange = async (event: any) => {
-  if (
-    event.data === window.YT.PlayerState.ENDED ||
-    event.data === window.YT.PlayerState.PLAYING
-  ) {
-    if (songList.value.length === 0) {
-      player.stopVideo(); // Stop playback if queue is empty
-      return;
-    }
+  if (event.data === window.YT.PlayerState.PLAYING) {
+    // Set the current song BEFORE removing it from the queue
+    currentSong.value = songList.value[currentVideoIndex.value];
 
-    try {
-      let { data, error: fetchError } = await supabase
-        .from("songs")
-        .select("queue")
-        .eq("code", roomId.value)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      const updatedQueue =
-        data?.queue?.filter(
-          (song: { video_id: string }) =>
-            song.video_id !== currentSong.value?.video_id
-        ) || [];
-
-      const { error: updateError } = await supabase
-        .from("songs")
-        .update({ queue: updatedQueue })
-        .eq("code", roomId.value);
-
-      if (updateError) throw updateError;
-
-      songList.value = updatedQueue;
-
-      // If the current song was deleted, stop playback or move to the next song
-      if (
-        !updatedQueue.some(
-          (song: any) => song.video_id === currentSong.value?.video_id
-        )
-      ) {
-        if (updatedQueue.length > 0) {
-          playSong(0); // Play the next song in queue
-        } else {
-          player.stopVideo(); // No songs left, stop the player
-        }
+    // Remove current song from queue, but let it play fully
+    setTimeout(async () => {
+      if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+        await removeCurrentSongFromQueue(); // Remove from UI but let it keep playing
       }
-    } catch (error: any) {
-      console.error("Error updating queue in DB:", error.message);
+    }, 2000); // Small delay for safety
+  }
+
+  if (event.data === window.YT.PlayerState.ENDED) {
+    // Only move to the next song when the current one has finished
+    if (songList.value.length > 0) {
+      playSong(0); // Play the next song in queue
+    } else {
+      player.stopVideo(); // Stop playback if queue is empty
     }
   }
 };
 
-const currentSong = computed(
-  () => songList.value[currentVideoIndex.value] || null
-);
+const removeCurrentSongFromQueue = async () => {
+  try {
+    let { data, error: fetchError } = await supabase
+      .from("songs")
+      .select("queue")
+      .eq("code", roomId.value)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const updatedQueue =
+      data?.queue?.filter(
+        (song: { video_id: string }) =>
+          song.video_id !== currentSong.value?.video_id
+      ) || [];
+
+    const { error: updateError } = await supabase
+      .from("songs")
+      .update({ queue: updatedQueue })
+      .eq("code", roomId.value);
+
+    if (updateError) throw updateError;
+
+    songList.value = updatedQueue; // Update UI (removes from queue list)
+  } catch (error: any) {
+    console.error("Error updating queue in DB:", error.message);
+  }
+};
 </script>
