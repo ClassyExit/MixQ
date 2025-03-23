@@ -1,11 +1,15 @@
 <template>
   <div
-    class="w-full md:h-screen bg-base-200 flex flex-col space-y-4 md:space-y-0 p-4 md:flex-row md:justify-between space-x-0 md:space-x-4"
+    class="w-full md:h-screen bg-base-200 flex flex-col space-y-4 md:space-y-0 p-4 4xl:p-8 5xl:p-10 6xl:p-12 md:flex-row md:justify-between space-x-0 md:space-x-4"
   >
-    <div class="flex flex-col h-full md:w-8/12 rounded space-y-4">
-      <div class="flex flex-row text-3xl items-center space-x-2">
+    <div
+      class="flex flex-col h-full md:w-8/12 rounded space-y-4 4xl:space-y-8 5xl:space-y-16 6xl:space-y-20"
+    >
+      <div
+        class="flex flex-row text-xl lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-4xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl items-center space-x-2"
+      >
         <router-link
-          class="w-fit font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+          class="w-fit font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent xl:pr-8 4xl:pr-16 5xl:pr-20 6xl:pr-24"
           :to="{ name: 'Home' }"
         >
           MixQ
@@ -14,15 +18,15 @@
         <transition name="slide-fade">
           <div
             v-if="currentSong"
-            class="flex flex-row items-center justify-center w-full space-x-2"
+            class="flex flex-row items-center justify-center space-x-2 flex-1"
           >
             <img
               src="../assets/images/audio-visualizer.svg"
               alt="audio-visualizer"
-              class="size-10 md:size-12 lg:size-14 scale-150 lg:scale-200 rounded-box flex items-center justify-center pl-4"
+              class="size-10 md:size-12 lg:size-14 3xl:size-18 4xl:size-22 5xl:size-28 6xl:size-32 scale-150 4xl:scale-200 rounded-box flex items-center justify-center pl-4"
             />
             <div class="flex flex-col">
-              <div>{{ currentSong.title }}</div>
+              <div class="line-clamp-1">{{ currentSong.title }}</div>
             </div>
           </div>
         </transition>
@@ -52,13 +56,24 @@
     <div class="md:w-4/12 flex-1 flex flex-col space-y-4">
       <div class="h-96 md:h-1/2 bg-base-100 rounded">
         <div
-          class="h-1/12 flex text-content-base items-center px-4 text-xs opacity-60 tracking-wide"
+          class="h-1/12 flex text-content-base items-center text-xs lg:text-sm xl:text-lg 2xl:text-xl 3xl:text-2xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl px-4 opacity-60 tracking-wide space-x-1"
         >
-          Queue ({{ songList.length }})
+          <span>Queue</span>
+          <span
+            v-if="songList.length"
+            class="flex items-center justify-between w-full space-x-1 lg:space-x-2"
+          >
+            <div class="px-2">({{ songList.length }})</div>
+
+            <div class="">{{ runTime }}</div>
+          </span>
         </div>
 
         <ul class="h-11/12 list rounded-box shadow-md overflow-y-auto">
-          <li v-if="!songList.length" class="p-4 text-xl">
+          <li
+            v-if="!songList.length"
+            class="p-4 text-xs lg:text-sm xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl"
+          >
             No songs in queue.
           </li>
 
@@ -66,24 +81,30 @@
             <li
               v-for="(song, index) in songList"
               :key="song.video_id"
-              class="list-row cursor-pointer"
+              class="list-row cursor-pointer 4xl:space-y-4 5xl:space-y-6 6xl:space-y-8"
               @click="playSong(index)"
             >
               <div>
                 <img
                   :class="
                     imgError
-                      ? 'size-10 rounded-box bg-gray-400'
-                      : 'size-10 rounded-box'
+                      ? 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-30 5xl:size-36 6xl:size-50   rounded-box bg-gray-400'
+                      : 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-30 5xl:size-36 6xl:size-50  rounded-box'
                   "
                   :src="song.thumbnail"
                   alt="thumbnail"
                   @error="handleImageError"
                 />
               </div>
-              <div class="flex flex-col">
-                <div>{{ song.title }}</div>
-                <div class="text-xs uppercase font-semibold opacity-60">
+              <div class="flex flex-col 4xl:space-y-2 6xl:space-y-4">
+                <div
+                  class="line-clamp-1 text-xs lg:text-xl xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-5xl 5xl:text-5xl 6xl:text-7xl"
+                >
+                  {{ song.title }}
+                </div>
+                <div
+                  class="text-xs lg:text-xs xl:text-md 2xl:text-lg 3xl:text-xl 4xl:text-3xl 5xl:text-4xl 6xl:text-6xl uppercase font-semibold opacity-50"
+                >
                   {{ song.duration }}
                 </div>
               </div>
@@ -97,12 +118,18 @@
           </transition-group>
         </ul>
       </div>
-      <div class="md:h-1/2 bg-base-100 rounded p-4 space-y-4">
-        <div class="flex flex-col space-y-2 text-base-content">
-          <div class="text-2xl">Add songs to the queue</div>
-          <div class="text-md">Room code: {{ roomId }}</div>
+      <div class="md:h-1/2 bg-base-100 rounded p-4">
+        <div class="flex h-1/6 flex-col space-y-2 text-base-content">
+          <div
+            class="text-secondary text-md lg:text-2xl xl:text-md 2xl:text-2xl 3xl:text-5xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl"
+          >
+            Room Code: {{ roomId }}
+          </div>
+          <div
+            class="text-xs lg:text-xs xl:text-lg 2xl:text-lg 3xl:text-4xl 4xl:text-5xl 5xl:text-7xl 6xl:text-8xl"
+          ></div>
         </div>
-        <div class="flex items-center justify-center">
+        <div class="flex h-5/6 items-center justify-center">
           <QRCodeGenerator
             :value="roomLinkValue"
             :background="`#ffffff`"
@@ -145,7 +172,24 @@ const showPlayer = ref(false);
 const isYouTubeAPILoaded = ref(false); // Track if API has loaded
 
 const containerClass = computed(() => {
-  return "h-[400px] sm:h-[400px] md:h-[400px] lg:h-[600px] xl:h-[800px] ";
+  return "h-[400px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[500px] 2xl:h-[800px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
+});
+
+const runTime = computed(() => {
+  if (!songList.value.length) return "0 mins";
+
+  const totalSeconds = songList.value.reduce(
+    (acc: number, song: { duration: string }) => {
+      const [minutes, seconds] = song.duration.split(":").map(Number);
+      return acc + minutes * 60 + seconds;
+    },
+    0
+  );
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  return hours > 0 ? `${hours} hours, ${minutes} mins` : `${minutes} mins`;
 });
 
 // Queue - Initially Empty and fetch songs from DB
@@ -311,9 +355,9 @@ const onPlayerStateChange = async (event: any) => {
     // Remove current song from queue, but let it play fully
     setTimeout(async () => {
       if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-        await removeCurrentSongFromQueue(); // Remove from UI but let it keep playing
+        await removeCurrentSongFromQueue(); // Remove from queue but let it keep playing
       }
-    }, 2000); // Small delay for safety
+    }, 1500);
   }
 
   if (event.data === window.YT.PlayerState.ENDED) {

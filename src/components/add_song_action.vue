@@ -53,6 +53,12 @@ const addSong = async () => {
     // Ensure queue is an array
     let existingQueue = Array.isArray(data?.queue) ? data.queue : [];
 
+    // If song already exists in queue, don't add duplicate
+    if (existingQueue.some((song) => song.video_id === props.video_id)) {
+      showNotification("Song already in queue", "info");
+      return;
+    }
+
     // Append new song
     const updatedQueue = [
       ...existingQueue,

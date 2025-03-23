@@ -1,7 +1,7 @@
 <template>
   <div
     id="notification-container"
-    class="fixed top-4 right-4 flex flex-col space-y-2"
+    class="fixed top-4 right-4 flex flex-col space-y-2 z-50"
   ></div>
 </template>
 
