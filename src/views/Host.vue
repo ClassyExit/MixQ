@@ -6,7 +6,7 @@
       class="flex flex-col h-full md:w-8/12 rounded space-y-4 4xl:space-y-8 5xl:space-y-16 6xl:space-y-20"
     >
       <div
-        class="flex flex-row text-xl lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-4xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl items-center space-x-2"
+        class="flex flex-row text-2xl lg:text-xl xl:text-3xl 2xl:text-5xl 3xl:text-7xl 4xl:text-9xl items-center space-x-2"
       >
         <router-link
           class="w-fit font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent xl:pr-8 4xl:pr-16 5xl:pr-20 6xl:pr-24"
@@ -56,7 +56,7 @@
     <div class="md:w-4/12 flex-1 flex flex-col space-y-4">
       <div class="h-96 md:h-1/2 bg-base-100 rounded">
         <div
-          class="h-1/12 flex text-content-base items-center text-xs lg:text-sm xl:text-lg 2xl:text-xl 3xl:text-2xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl px-4 opacity-60 tracking-wide space-x-1"
+          class="h-1/12 flex text-content-base items-center text-md lg:text-md xl:text-lg 2xl:text-xl 3xl:text-2xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl px-4 opacity-60 tracking-wide space-x-1"
         >
           <span>Queue</span>
           <span
@@ -72,7 +72,7 @@
         <ul class="h-11/12 list rounded-box shadow-md overflow-y-auto">
           <li
             v-if="!songList.length"
-            class="p-4 text-xs lg:text-sm xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl"
+            class="p-4 text-lg xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl"
           >
             No songs in queue.
           </li>
@@ -86,12 +86,13 @@
             >
               <div>
                 <img
+                  :key="song.thumbnail"
                   :class="
                     imgError
                       ? 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-30 5xl:size-36 6xl:size-50   rounded-box bg-gray-400'
                       : 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-30 5xl:size-36 6xl:size-50  rounded-box'
                   "
-                  :src="song.thumbnail"
+                  :src="encodeURI(song.thumbnail)"
                   alt="thumbnail"
                   @error="handleImageError"
                 />
@@ -119,12 +120,32 @@
         </ul>
       </div>
       <div class="md:h-1/2 bg-base-100 rounded p-4">
-        <div class="flex h-1/6 flex-col space-y-2 text-base-content">
+        <div
+          class="flex flex-row items-center space-x-2 h-1/6 flex-col space-y-2 text-base-content"
+        >
+          <router-link
+            :to="{ name: 'Room', params: { id: roomId } }"
+            class="md:hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              class="h-6 w-6"
+            >
+              <path
+                fill="currentColor"
+                d="M3.5 2.5a1 1 0 0 0-1 1v.75a.75.75 0 0 1-1.5 0V3.5A2.5 2.5 0 0 1 3.5 1h.75a.75.75 0 0 1 0 1.5zm0 11a1 1 0 0 1-1-1v-.75a.75.75 0 0 0-1.5 0v.75A2.5 2.5 0 0 0 3.5 15h.75a.75.75 0 0 0 0-1.5zm10-10a1 1 0 0 0-1-1h-.75a.75.75 0 0 1 0-1.5h.75A2.5 2.5 0 0 1 15 3.5v.75a.75.75 0 0 1-1.5 0zm-1 10a1 1 0 0 0 1-1v-.75a.75.75 0 0 1 1.5 0v.75a2.5 2.5 0 0 1-2.5 2.5h-.75a.75.75 0 0 1 0-1.5zm-8-6.115V10a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1V7.385a1 1 0 0 0-1-1h-.75l-.58-.92A1 1 0 0 0 8.323 5h-.648a1 1 0 0 0-.845.466l-.581.919H5.5a1 1 0 0 0-1 1M9 8.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0"
+              />
+            </svg>
+          </router-link>
           <div
-            class="text-secondary text-md lg:text-2xl xl:text-md 2xl:text-2xl 3xl:text-5xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl"
+            class="text-secondary text-lg lg:text-2xl xl:text-md 2xl:text-2xl 3xl:text-5xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl"
           >
             Room Code: {{ roomId }}
           </div>
+
           <div
             class="text-xs lg:text-xs xl:text-lg 2xl:text-lg 3xl:text-4xl 4xl:text-5xl 5xl:text-7xl 6xl:text-8xl"
           ></div>

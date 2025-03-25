@@ -70,12 +70,13 @@
               class="p-2 border-b flex flex-row items-center space-x-2"
             >
               <img
+                :key="song.thumbnail"
                 :class="
                   imgError
                     ? 'size-10 rounded-box bg-gray-400'
                     : 'size-10 rounded-box'
                 "
-                :src="song.thumbnail"
+                :src="encodeURI(song.thumbnail)"
                 alt="thumbnail"
                 @error="handleImageError"
               />
