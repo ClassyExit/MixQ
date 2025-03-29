@@ -10,7 +10,7 @@
     <button
       v-else
       @click="createHostRoom"
-      class="cursor-pointer bg-primary hover:scale-105 transition-transform duration-300 px-6 py-3 rounded-xl shadow-lg"
+      class="cursor-pointer bg-primary hover:scale-105 transition-transform duration-300 px-6 py-3 text-xl 2xl:text-2xl 3xl:text-3xl rounded-xl shadow-lg"
     >
       Create Room 🎶
     </button>

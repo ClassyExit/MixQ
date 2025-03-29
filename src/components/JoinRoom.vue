@@ -9,14 +9,16 @@
       <div class="indicator-item indicator-bottom">
         <button
           @click="joinRoom()"
-          class="btn btn-secondary hover:scale-105 transition-transform duration-300"
+          class="btn btn-secondary hover:scale-105 transition-transform duration-300 text-lg 2xl:text-2xl 3xl:text-3xl px-4 py-4"
         >
           Join 🔗
         </button>
       </div>
       <div class="card border border-base-300 bg-base-100 shadow-sm">
         <div class="card-body">
-          <h2 class="text-left text-white text-lg">Join a Room</h2>
+          <h2 class="text-left text-white text-xl 2xl:text-2xl 3xl:text-3xl">
+            Join a Room
+          </h2>
           <input
             class="input w-full"
             v-model="roomCode"

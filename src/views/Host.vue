@@ -6,13 +6,13 @@
       class="flex flex-col h-full md:w-8/12 rounded space-y-4 4xl:space-y-8 5xl:space-y-16 6xl:space-y-20"
     >
       <div
-        class="flex flex-row text-2xl lg:text-xl xl:text-3xl 2xl:text-5xl 3xl:text-7xl 4xl:text-9xl items-center space-x-2"
+        class="flex flex-row text-3xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-7xl 4xl:text-9xl items-start space-x-2 h-16 2xl:h-20 3xl:h-30 4xl:h-50 5xl:h-60 6xl:h-96"
       >
         <router-link
-          class="w-fit font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent xl:pr-8 4xl:pr-16 5xl:pr-20 6xl:pr-24"
+          class="w-fit flex items-center justify-center font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent xl:pr-8 4xl:pr-16 5xl:pr-20 6xl:pr-24 pb-4"
           :to="{ name: 'Home' }"
         >
-          MixQ
+          MixQ.xyz
         </router-link>
 
         <transition name="slide-fade">
@@ -69,7 +69,9 @@
           </span>
         </div>
 
-        <ul class="h-11/12 list rounded-box shadow-md overflow-y-auto">
+        <ul
+          class="h-11/12 list rounded-box shadow-md overflow-y-auto no-scrollbar"
+        >
           <li
             v-if="!songList.length"
             class="p-4 text-lg xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl"
@@ -89,8 +91,8 @@
                   :key="song.thumbnail"
                   :class="
                     imgError
-                      ? 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-30 5xl:size-36 6xl:size-50   rounded-box bg-gray-400'
-                      : 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-30 5xl:size-36 6xl:size-50  rounded-box'
+                      ? 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-36 5xl:size-42 6xl:size-72   rounded-box bg-gray-400'
+                      : 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-36 5xl:size-42 6xl:size-72  rounded-box'
                   "
                   :src="encodeURI(song.thumbnail)"
                   alt="thumbnail"
@@ -99,12 +101,12 @@
               </div>
               <div class="flex flex-col 4xl:space-y-2 6xl:space-y-4">
                 <div
-                  class="line-clamp-1 text-xs lg:text-xl xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-5xl 5xl:text-5xl 6xl:text-7xl"
+                  class="line-clamp-1 text-xs lg:text-xl xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-6xl 5xl:text-7xl 6xl:text-8xl"
                 >
                   {{ song.title }}
                 </div>
                 <div
-                  class="text-xs lg:text-xs xl:text-md 2xl:text-lg 3xl:text-xl 4xl:text-3xl 5xl:text-4xl 6xl:text-6xl uppercase font-semibold opacity-50"
+                  class="text-xs lg:text-xs xl:text-md 2xl:text-lg 3xl:text-2xl 4xl:text-4xl 5xl:text-5xl 6xl:text-7xl uppercase font-semibold opacity-50"
                 >
                   {{ song.duration }}
                 </div>
@@ -141,9 +143,10 @@
             </svg>
           </router-link>
           <div
-            class="text-secondary text-lg lg:text-2xl xl:text-md 2xl:text-2xl 3xl:text-5xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl"
+            class="flex flex-row space-x-2 text-lg lg:text-2xl xl:text-md 2xl:text-2xl 3xl:text-5xl 4xl:text-6xl 5xl:text-8xl 6xl:text-9xl"
           >
-            Room Code: {{ roomId }}
+            <div class="">Room code:</div>
+            <div class="text-secondary">{{ roomId }}</div>
           </div>
 
           <div
@@ -332,7 +335,7 @@ const initializePlayer = () => {
     videoId: songList.value[currentVideoIndex.value].video_id,
     playerVars: {
       autoplay: 1,
-      controls: 0, // No controls
+      controls: 1, // No controls
       modestbranding: 1, // Hide YouTube branding
       rel: 0, // Prevent related videos
       showinfo: 0, // Hide video info
@@ -386,7 +389,11 @@ const onPlayerStateChange = async (event: any) => {
     if (songList.value.length > 0) {
       playSong(0); // Play the next song in queue
     } else {
-      player.stopVideo(); // Stop playback if queue is empty
+      // Nothing else to play, reset all players
+      player.stopVideo();
+      player = null;
+      showPlayer.value = false;
+      isYouTubeAPILoaded.value = false;
     }
   }
 };
@@ -470,5 +477,16 @@ const removeCurrentSongFromQueue = async () => {
 .slide-fade-leave-to {
   transform: translateX(-50px);
   opacity: 0;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 </style>
