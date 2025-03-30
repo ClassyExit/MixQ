@@ -2,7 +2,8 @@
 
 MixQ is a web application that allows users to host or join a room to share and play music collaboratively. Users can search for songs and add them to a shared queue.
 
-[Project MixQ](https://mixq-b6090.web.app/)
+[Project MixQ](https://mixq.xyz/)
+[BackupLink](https://mixq-b6090.web.app/)
 
 ## Features
 
