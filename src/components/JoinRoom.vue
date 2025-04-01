@@ -9,7 +9,7 @@
       <div class="indicator-item indicator-bottom">
         <button
           @click="joinRoom()"
-          class="btn btn-secondary hover:scale-105 transition-transform duration-300 text-lg 2xl:text-2xl 3xl:text-3xl px-4 py-4"
+          class="btn btn-secondary btn-md hover:scale-105 transition-transform duration-300 text-lg 2xl:text-xl 3xl:text-2xl"
         >
           Join 🔗
         </button>

@@ -1,7 +1,14 @@
 <template>
   <div
-    class="bg-base-200 min-h-screen flex flex-col items-center p-6 landing-page"
+    class="bg-base-200 min-h-screen flex flex-col items-center p-4 landing-page"
   >
+    <div class="flex w-full">
+      <img
+        alt="Logo"
+        class="h-16 2xl:h-20 3xl:h-30 4xl:h-50 5xl:h-60 6xl:h-96 rounded"
+        src="../assets/logo-1.png"
+      />
+    </div>
     <!-- Hero Section -->
     <section class="text-center space-y-4 py-12">
       <h1
@@ -69,6 +76,53 @@
           >
             Effortlessly add and remove songs in real time. The queue updates
             instantly for all listeners.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="mt-16 w-full text-xl 2xl:w-3/4 4xl:w-1/2 text-center space-y-2"
+    >
+      <div class="collapse collapse-plus bg-base-100 border border-base-300">
+        <input type="radio" name="my-accordion-3" checked:false="checked" />
+        <div class="collapse-title font-semibold">
+          What is MixQ and how do I use it?
+        </div>
+        <div class="collapse-content text-sm">
+          <p>
+            MixQ is a web app that features a shared music queue, ideal for
+            parties or study sessions. Multiple users can add songs to a queue
+            for everyone to enjoy. To get started, create a room using the
+            "Create Room" button or join an existing room by entering the room
+            code displayed in an active session.
+          </p>
+        </div>
+      </div>
+      <div class="collapse collapse-plus bg-base-100 border border-base-300">
+        <input type="radio" name="my-accordion-3" />
+        <div class="collapse-title font-semibold">
+          How does it work? How do I connect?
+        </div>
+        <div class="collapse-content text-sm">
+          <p>
+            For the best experience, set this up on a central device like a TV
+            where everyone can see the queue. Use a laptop, tablet, or any
+            compatible device connected to the TV via HDMI, display cables, or
+            casting methods.
+          </p>
+        </div>
+      </div>
+      <div class="collapse collapse-plus bg-base-100 border border-base-300">
+        <input type="radio" name="my-accordion-3" />
+        <div class="collapse-title font-semibold">
+          How do I connect my music?
+        </div>
+        <div class="collapse-content text-sm">
+          <p>
+            MixQ integrates with YouTube and plays songs through an embedded
+            YouTube player. To add music, scan the QR code with your phone and
+            search for songs you want to queue up!
           </p>
         </div>
       </div>

@@ -6,19 +6,23 @@
       class="flex flex-col h-full md:w-8/12 rounded space-y-4 4xl:space-y-8 5xl:space-y-16 6xl:space-y-20"
     >
       <div
-        class="flex flex-row text-3xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-7xl 4xl:text-9xl items-start space-x-2 h-16 2xl:h-20 3xl:h-30 4xl:h-50 5xl:h-60 6xl:h-96"
+        class="flex flex-row items-center text-3xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-7xl 4xl:text-9xl items-start space-x-2 h-16 2xl:h-20 3xl:h-30 4xl:h-50 5xl:h-60 6xl:h-96"
       >
         <router-link
-          class="w-fit flex items-center justify-center font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent xl:pr-8 4xl:pr-16 5xl:pr-20 6xl:pr-24 pb-4"
+          class="w-fit flex space-x-4 items-center justify-center font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent xl:pr-8 4xl:pr-16 5xl:pr-20 6xl:pr-24 pb-4"
           :to="{ name: 'Home' }"
         >
-          MixQ.xyz
+          <img
+            alt="Logo"
+            class="h-16 2xl:h-20 3xl:h-30 4xl:h-50 5xl:h-60 6xl:h-96 rounded"
+            src="../assets/logo-1.png"
+          />
         </router-link>
 
         <transition name="slide-fade">
           <div
             v-if="currentSong"
-            class="flex flex-row items-center justify-center space-x-2 flex-1"
+            class="flex flex-row items-center justify-center space-x-2 flex-1 h-full"
           >
             <img
               src="../assets/images/audio-visualizer.svg"
@@ -48,7 +52,7 @@
           </div>
 
           <!-- YouTube Player -->
-          <div v-else id="player" class="w-full h-full"></div>
+          <div v-else id="player" class="w-full h-full overflow-hidden"></div>
         </div>
       </div>
     </div>
@@ -196,7 +200,7 @@ const showPlayer = ref(false);
 const isYouTubeAPILoaded = ref(false); // Track if API has loaded
 
 const containerClass = computed(() => {
-  return "h-[400px] sm:h-[400px] md:h-[500px] lg:h-[600px] xl:h-[500px] 2xl:h-[800px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
+  return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[550px] xl:h-[550px] 2xl:h-[800px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
 });
 
 const runTime = computed(() => {
