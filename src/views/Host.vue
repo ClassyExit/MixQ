@@ -200,7 +200,7 @@ const showPlayer = ref(false);
 const isYouTubeAPILoaded = ref(false); // Track if API has loaded
 
 const containerClass = computed(() => {
-  return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[550px] xl:h-[550px] 2xl:h-[800px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
+  return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[550px] xl:h-[550px] 2xl:h-[700px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
 });
 
 const runTime = computed(() => {
@@ -318,6 +318,7 @@ onUnmounted(() => {
 
 // Watch for changes in the song queue
 watch(songList, async (newList) => {
+  console.log("Watching, songList", songList.value.length);
   if (newList.length > 0 && !player) {
     showPlayer.value = true; // Show the player UI
 

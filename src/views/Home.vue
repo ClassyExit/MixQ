@@ -2,13 +2,6 @@
   <div
     class="bg-base-200 min-h-screen flex flex-col items-center p-4 landing-page"
   >
-    <div class="flex w-full">
-      <img
-        alt="Logo"
-        class="h-16 2xl:h-20 3xl:h-30 4xl:h-50 5xl:h-60 6xl:h-96 rounded"
-        src="../assets/logo-1.png"
-      />
-    </div>
     <!-- Hero Section -->
     <section class="text-center space-y-4 py-12">
       <h1
@@ -31,49 +24,88 @@
       </div>
     </section>
 
+    <!-- Project Screenshots Section -->
+    <section class="mt-16 w-full max-w-6xl text-center px-4">
+      <h2 class="text-4xl font-bold mb-10">Why Choose MixQ?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Image Card -->
+        <div
+          class="group relative overflow-hidden rounded-2xl shadow-xl bg-base-100"
+        >
+          <img
+            src="@/assets/images/host-room.png"
+            alt="Host Room"
+            class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div
+            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            <span class="text-white text-lg font-semibold">Host Room</span>
+          </div>
+        </div>
+
+        <!-- Image Card -->
+        <div
+          class="group relative overflow-hidden rounded-2xl shadow-xl bg-base-100"
+        >
+          <img
+            src="@/assets/images/search-song.png"
+            alt="Search Song"
+            class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div
+            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            <span class="text-white text-lg font-semibold">Search Songs</span>
+          </div>
+        </div>
+
+        <!-- Image Card -->
+        <div
+          class="group relative overflow-hidden rounded-2xl shadow-xl bg-base-100"
+        >
+          <img
+            src="@/assets/images/queue.png"
+            alt="Queue Management"
+            class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div
+            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            <span class="text-white text-lg font-semibold"
+              >Queue Management</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Features Section -->
     <section class="mt-16 w-full 2xl:w-3/4 4xl:w-1/2 text-center">
-      <h2
-        class="text-4xl 2xl:text-5xl 3xl:text-6xl 4xl:text-8xl font-bold mb-10"
-      >
-        Why Choose MixQ?
-      </h2>
       <div class="grid md:grid-cols-3 gap-8">
-        <div class="card bg-base-100 shadow-lg p-6 rounded-xl">
-          <h3
-            class="text-xl 2xl:text-3xl 4xl:text-4xl 5xl:text-5xl 6xl:text-6xl font-bold"
-          >
-            Collaborative Playlists 🤝
-          </h3>
-          <p
-            class="text-gray-400 2xl:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl 6xl:text-5xl mt-2"
-          >
+        <div
+          class="card bg-base-100 shadow-lg p-6 rounded-xl hover:scale-105 transition-transform"
+        >
+          <h3 class="text-xl font-bold">Collaborative Playlists 🤝</h3>
+          <p class="text-gray-400 mt-2">
             Everyone with the room code can contribute, making it great for
             parties, study sessions, or casual hangouts.
           </p>
         </div>
-        <div class="card bg-base-100 shadow-lg p-6 rounded-xl">
-          <h3
-            class="text-xl 2xl:text-3xl 4xl:text-4xl 5xl:text-5xl 6xl:text-6xl font-bold"
-          >
-            Instant Room Access 🔗
-          </h3>
-          <p
-            class="text-gray-400 2xl:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl 6xl:text-5xl mt-2"
-          >
+        <div
+          class="card bg-base-100 shadow-lg p-6 rounded-xl hover:scale-105 transition-transform"
+        >
+          <h3 class="text-xl font-bold">Instant Room Access 🔗</h3>
+          <p class="text-gray-400 mt-2">
             Join a room instantly by scanning a QR code or entering a code. No
             downloads or sign-ups required!
           </p>
         </div>
-        <div class="card bg-base-100 shadow-lg p-6 rounded-xl">
-          <h3
-            class="text-xl 2xl:text-3xl 4xl:text-4xl 5xl:text-5xl 6xl:text-6xl font-bold"
-          >
-            Queue Management 📋
-          </h3>
-          <p
-            class="text-gray-400 2xl:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl 6xl:text-5xl mt-2"
-          >
+        <div
+          class="card bg-base-100 shadow-lg p-6 rounded-xl hover:scale-105 transition-transform"
+        >
+          <h3 class="text-xl font-bold">Queue Management 📋</h3>
+          <p class="text-gray-400 mt-2">
             Effortlessly add and remove songs in real time. The queue updates
             instantly for all listeners.
           </p>
@@ -81,11 +113,13 @@
       </div>
     </section>
 
+    <!-- FAQ Section -->
     <section
       class="mt-16 w-full text-xl 2xl:w-3/4 4xl:w-1/2 text-center space-y-2"
     >
+      <h2 class="text-4xl font-bold mb-6">Frequently Asked Questions ❓</h2>
       <div class="collapse collapse-plus bg-base-100 border border-base-300">
-        <input type="radio" name="my-accordion-3" checked:false="checked" />
+        <input type="radio" name="faq" />
         <div class="collapse-title font-semibold">
           What is MixQ and how do I use it?
         </div>
@@ -100,7 +134,7 @@
         </div>
       </div>
       <div class="collapse collapse-plus bg-base-100 border border-base-300">
-        <input type="radio" name="my-accordion-3" />
+        <input type="radio" name="faq" />
         <div class="collapse-title font-semibold">
           How does it work? How do I connect?
         </div>
@@ -114,7 +148,7 @@
         </div>
       </div>
       <div class="collapse collapse-plus bg-base-100 border border-base-300">
-        <input type="radio" name="my-accordion-3" />
+        <input type="radio" name="faq" />
         <div class="collapse-title font-semibold">
           How do I connect my music?
         </div>
@@ -130,7 +164,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import CreateHostRoom from "../components/CreateHostRoom.vue";
 import JoinRoom from "../components/JoinRoom.vue";
 </script>
