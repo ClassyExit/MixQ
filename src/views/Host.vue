@@ -318,7 +318,7 @@ onUnmounted(() => {
 
 // Watch for changes in the song queue
 watch(songList, async (newList) => {
-  console.log("Watching, songList", songList.value.length);
+  console.log("Watching, songList", songList.value.length, player);
   if (newList.length > 0 && !player) {
     showPlayer.value = true; // Show the player UI
 
