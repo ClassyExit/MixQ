@@ -24,62 +24,6 @@
       </div>
     </section>
 
-    <!-- Project Screenshots Section -->
-    <section class="mt-16 w-full max-w-6xl text-center px-4">
-      <h2 class="text-4xl font-bold mb-10">Why Choose MixQ?</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- Image Card -->
-        <div
-          class="group relative overflow-hidden rounded-2xl shadow-xl bg-base-100"
-        >
-          <img
-            src="@/assets/images/host-room.png"
-            alt="Host Room"
-            class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div
-            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <span class="text-white text-lg font-semibold">Host Room</span>
-          </div>
-        </div>
-
-        <!-- Image Card -->
-        <div
-          class="group relative overflow-hidden rounded-2xl shadow-xl bg-base-100"
-        >
-          <img
-            src="@/assets/images/search-song.png"
-            alt="Search Song"
-            class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div
-            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <span class="text-white text-lg font-semibold">Search Songs</span>
-          </div>
-        </div>
-
-        <!-- Image Card -->
-        <div
-          class="group relative overflow-hidden rounded-2xl shadow-xl bg-base-100"
-        >
-          <img
-            src="@/assets/images/queue.png"
-            alt="Queue Management"
-            class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div
-            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <span class="text-white text-lg font-semibold"
-              >Queue Management</span
-            >
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Features Section -->
     <section class="mt-16 w-full 2xl:w-3/4 4xl:w-1/2 text-center">
       <div class="grid md:grid-cols-3 gap-8">

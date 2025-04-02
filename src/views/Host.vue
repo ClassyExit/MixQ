@@ -318,13 +318,11 @@ onUnmounted(() => {
 
 // Watch for changes in the song queue
 watch(songList, async (newList) => {
-  console.log("Watching, songList", songList.value.length, player);
-  if (newList.length > 0 && !player) {
+  if (newList.length > 0) {
     showPlayer.value = true; // Show the player UI
 
     // Ensure YouTube API is loaded before initializing the player
     if (!isYouTubeAPILoaded.value) {
-      console.warn("YouTube API not yet loaded. Waiting...");
       await waitForYouTubeAPI(); // Wait before initializing
     }
 
@@ -341,9 +339,9 @@ const initializePlayer = () => {
     playerVars: {
       autoplay: 1,
       controls: 1, // No controls
-      modestbranding: 1, // Hide YouTube branding
-      rel: 0, // Prevent related videos
-      showinfo: 0, // Hide video info
+      modestbranding: 0, // Hide YouTube branding
+      rel: 1, // Prevent related videos
+      showinfo: 1, // Hide video info
       iv_load_policy: 3, // Hide annotations
     },
     events: {
