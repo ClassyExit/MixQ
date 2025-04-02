@@ -183,7 +183,7 @@ import { showNotification } from "../utils/notifications";
 // Router setup
 const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
-const roomLinkValue = `https://mixq-b6090.web.app/room/${roomId.value}`;
+const roomLinkValue = `https://mixq.xyz/room/${roomId.value}`;
 let queueSubscription: any = null; // Store the channel reference
 
 // Image Error Handling
