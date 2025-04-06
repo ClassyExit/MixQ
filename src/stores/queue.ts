@@ -55,7 +55,10 @@ export const useQueueStore = defineStore("queue", {
 
     async addSong(song: Song) {
       if (!this.room.id) {
-        showNotification("No room ID set", "error");
+        showNotification(
+          "Unable to get room ID, please create a new room or rejoin. ",
+          "error"
+        );
         return;
       }
 
@@ -117,7 +120,7 @@ export const useQueueStore = defineStore("queue", {
           .maybeSingle();
 
         if (fetchError) {
-          showNotification("Failed to fetch queue", "error");
+          console.error("Error fetching queue:", fetchError);
           return;
         }
 
@@ -142,19 +145,38 @@ export const useQueueStore = defineStore("queue", {
         // Update local state
         this.queue.songList = updatedQueue;
 
-        // Optional: play next song if current one was removed
-        const currentPlayingId = this.queue.currentSong?.video_id ?? null;
-
-        if (video_id === currentPlayingId && updatedQueue.length > 0) {
-          this.queue.currentSong = updatedQueue[0];
-          // Optional: trigger playback logic here if needed
-        } else if (updatedQueue.length === 0) {
-          this.queue.currentSong = null;
-        }
-
         showNotification("Song removed", "success", 1500);
       } catch (error: any) {
         showNotification("Failed to remove song", "error", 1500);
+      }
+    },
+
+    async removeCurrentSongFromQueue() {
+      try {
+        let { data, error: fetchError } = await supabase
+          .from("songs")
+          .select("queue")
+          .eq("code", this.room.id)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        const updatedQueue =
+          data?.queue?.filter(
+            (song: { video_id: string }) =>
+              song.video_id !== this.queue.currentSong?.video_id
+          ) || [];
+
+        const { error: updateError } = await supabase
+          .from("songs")
+          .update({ queue: updatedQueue })
+          .eq("code", this.room.id);
+
+        if (updateError) throw updateError;
+
+        this.queue.songList = updatedQueue; // Update UI (removes from queue list)
+      } catch (error: any) {
+        console.error("Error updating queue in DB:", error.message);
       }
     },
   },

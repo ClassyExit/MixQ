@@ -177,7 +177,7 @@ import { useRouter } from "vue-router";
 import { supabase } from "../utils/supabase";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
 import delete_song_action from "../components/delete_song_action.vue";
-// import { showNotification } from "../utils/notifications";
+
 import { useQueueStore } from "../stores/queue";
 import { storeToRefs } from "pinia";
 
@@ -374,16 +374,16 @@ const playSong = (index: number) => {
 // Auto play and handle delete from queue
 const onPlayerStateChange = async (event: any) => {
   if (event.data === window.YT.PlayerState.PLAYING) {
+    // Remove current song from queue, but let it play fully
     // Set the current song BEFORE removing it from the queue
     queueStore.queue.currentSong =
       queueStore.queue.songList[currentVideoIndex.value];
 
-    // Remove current song from queue, but let it play fully
     setTimeout(async () => {
       if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-        await removeCurrentSongFromQueue(); // Remove from queue but let it keep playing
+        await queueStore.removeCurrentSongFromQueue(); // Remove from queue but let it keep playing
       }
-    }, 1500);
+    }, 1500); // Delay to ensure the song is playing before removing it from the queue
   }
 
   if (event.data === window.YT.PlayerState.ENDED) {
@@ -397,36 +397,6 @@ const onPlayerStateChange = async (event: any) => {
       showPlayer.value = false;
       isYouTubeAPILoaded.value = false;
     }
-  }
-};
-
-// TODO: Move to store
-const removeCurrentSongFromQueue = async () => {
-  try {
-    let { data, error: fetchError } = await supabase
-      .from("songs")
-      .select("queue")
-      .eq("code", roomId.value)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    const updatedQueue =
-      data?.queue?.filter(
-        (song: { video_id: string }) =>
-          song.video_id !== queueStore.queue.currentSong?.video_id
-      ) || [];
-
-    const { error: updateError } = await supabase
-      .from("songs")
-      .update({ queue: updatedQueue })
-      .eq("code", roomId.value);
-
-    if (updateError) throw updateError;
-
-    queueStore.queue.songList = updatedQueue; // Update UI (removes from queue list)
-  } catch (error: any) {
-    console.error("Error updating queue in DB:", error.message);
   }
 };
 </script>
