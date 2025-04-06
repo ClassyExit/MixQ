@@ -4,11 +4,20 @@ declare global {
     onYouTubeIframeAPIReady: any;
   }
 
-  interface Song {
-    video_id: string;
-    title: string;
-    duration: string;
-    thumbnail: string;
+  namespace YT {
+    interface Player {
+      loadVideoById(videoId: string): void;
+      getPlayerState(): number;
+    }
+
+    interface OnStateChangeEvent {
+      data: number;
+    }
+
+    const PlayerState: {
+      ENDED: number;
+      PLAYING: number;
+    };
   }
 
   interface Song {
@@ -19,3 +28,5 @@ declare global {
     imageError?: boolean | false;
   }
 }
+
+declare global {}
