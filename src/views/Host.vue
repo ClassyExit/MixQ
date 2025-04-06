@@ -21,7 +21,7 @@
 
         <transition name="slide-fade">
           <div
-            v-if="currentSong"
+            v-if="queue.currentSong"
             class="flex flex-row items-center justify-center space-x-2 flex-1 h-full"
           >
             <img
@@ -30,7 +30,7 @@
               class="size-10 md:size-12 lg:size-14 3xl:size-18 4xl:size-22 5xl:size-28 6xl:size-32 scale-150 4xl:scale-200 rounded-box flex items-center justify-center pl-4"
             />
             <div class="flex flex-col">
-              <div class="line-clamp-1">{{ currentSong.title }}</div>
+              <div class="line-clamp-1">{{ queue.currentSong.title }}</div>
             </div>
           </div>
         </transition>
@@ -64,12 +64,11 @@
         >
           <span>Queue</span>
           <span
-            v-if="songList.length"
             class="flex items-center justify-between w-full space-x-1 lg:space-x-2"
           >
-            <div class="px-2">({{ songList.length }})</div>
+            <div class="px-2">({{ queue.songList.length }})</div>
 
-            <div class="">{{ runTime }}</div>
+            <div class="">{{ queueStore.runTime }}</div>
           </span>
         </div>
 
@@ -77,7 +76,7 @@
           class="h-11/12 list rounded-box shadow-md overflow-y-auto no-scrollbar"
         >
           <li
-            v-if="!songList.length"
+            v-if="!queue.songList.length"
             class="p-4 text-lg xl:text-lg 2xl:text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-6xl 6xl:text-8xl"
           >
             No songs in queue.
@@ -85,7 +84,7 @@
 
           <transition-group name="slide">
             <li
-              v-for="(song, index) in songList"
+              v-for="(song, index) in queue.songList"
               :key="song.video_id"
               class="list-row cursor-pointer 4xl:space-y-4 5xl:space-y-6 6xl:space-y-8"
               @click="playSong(index)"
@@ -94,13 +93,13 @@
                 <img
                   :key="song.thumbnail"
                   :class="
-                    imgError
+                    song.imageError
                       ? 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-36 5xl:size-42 6xl:size-72   rounded-box bg-gray-400'
                       : 'size-10 xl:size-14 2xl:size-18 3xl:size-24 4xl:size-36 5xl:size-42 6xl:size-72  rounded-box'
                   "
                   :src="encodeURI(song.thumbnail)"
                   alt="thumbnail"
-                  @error="handleImageError"
+                  @error="song.imageError = true"
                 />
               </div>
               <div class="flex flex-col 4xl:space-y-2 6xl:space-y-4">
@@ -173,29 +172,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, provide, onUnmounted, watch } from "vue";
+import { ref, onMounted, computed, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../utils/supabase";
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
 import delete_song_action from "../components/delete_song_action.vue";
-import { showNotification } from "../utils/notifications";
+// import { showNotification } from "../utils/notifications";
+import { useQueueStore } from "../stores/queue";
+import { storeToRefs } from "pinia";
+
+const queueStore = useQueueStore(); // Store for managing queue state
+const { queue } = storeToRefs(queueStore);
 
 // Router setup
 const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
+useQueueStore().setHostRoom(roomId.value);
 const roomLinkValue = `https://mixq.xyz/room/${roomId.value}`;
 let queueSubscription: any = null; // Store the channel reference
 
-// Image Error Handling
-const imgError = ref(false);
-
-const handleImageError = (event: any) => {
-  imgError.value = true; // Apply error state
-  event.target.src = ""; // Hide broken image
-};
-
 // YouTube Player
 let player: any = null;
+let playerReady = false;
+let pendingVideoIndex: any | null = ref(null);
 const showPlayer = ref(false);
 const isYouTubeAPILoaded = ref(false); // Track if API has loaded
 
@@ -203,50 +202,7 @@ const containerClass = computed(() => {
   return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[550px] xl:h-[550px] 2xl:h-[700px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
 });
 
-const runTime = computed(() => {
-  if (!songList.value.length) return "0 mins";
-
-  const totalSeconds = songList.value.reduce(
-    (acc: number, song: { duration: string }) => {
-      const [minutes, seconds] = song.duration.split(":").map(Number);
-      return acc + minutes * 60 + seconds;
-    },
-    0
-  );
-
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-  return hours > 0 ? `${hours} hours, ${minutes} mins` : `${minutes} mins`;
-});
-
-// Queue - Initially Empty and fetch songs from DB
-const songList: any = ref([]);
 const currentVideoIndex = ref(0);
-const currentSong = ref<Song | null>(null);
-
-// Provide songList & playSong globally
-provide("songList", songList);
-provide("playSong", (index: number) => playSong(index));
-
-const fetchSongs = async () => {
-  const { data, error } = await supabase
-    .from("songs")
-    .select("queue")
-    .eq("code", roomId.value)
-    .maybeSingle();
-
-  if (error) {
-    showNotification("Failed to get songs", "error");
-    return;
-  }
-
-  if (data && data.queue) {
-    songList.value = Array.isArray(data.queue)
-      ? data.queue
-      : JSON.parse(data.queue);
-  }
-};
 
 // Subscribe to Realtime Updates
 const subscribeToQueueUpdates = () => {
@@ -261,8 +217,7 @@ const subscribeToQueueUpdates = () => {
         filter: `code=eq.${roomId.value}`,
       },
       (payload) => {
-        // console.log("Queue updated!", payload.new.queue);
-        songList.value = payload.new.queue;
+        queueStore.queue.songList = payload.new.queue;
       }
     )
     .subscribe();
@@ -271,25 +226,25 @@ const subscribeToQueueUpdates = () => {
 const loadYouTubeAPI = () => {
   if (window.YT && window.YT.Player) {
     isYouTubeAPILoaded.value = true;
-    return;
+    return true;
   }
 
-  const tag = document.createElement("script");
-  tag.src = "https://www.youtube.com/iframe_api";
-  document.body.appendChild(tag);
-
-  window.onYouTubeIframeAPIReady = () => {
-    isYouTubeAPILoaded.value = true;
-  };
-};
-
-// Function to wait for YouTube API
-const waitForYouTubeAPI = () => {
-  if (window.YT && window.YT.Player) return Promise.resolve(true);
-
   return new Promise((resolve) => {
+    // Inject the YouTube API script
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    // Called when API is ready
+    window.onYouTubeIframeAPIReady = () => {
+      isYouTubeAPILoaded.value = true;
+      resolve(true);
+    };
+
+    // Fallback in case onYouTubeIframeAPIReady doesn't fire (e.g., already loaded)
     const checkAPI = () => {
       if (window.YT && window.YT.Player) {
+        isYouTubeAPILoaded.value = true;
         resolve(true);
       } else {
         requestAnimationFrame(checkAPI);
@@ -301,12 +256,11 @@ const waitForYouTubeAPI = () => {
 
 // Load YouTube API and fetch songs
 onMounted(async () => {
-  loadYouTubeAPI(); // Start loading YouTube API
-  await fetchSongs();
+  await loadYouTubeAPI(); // Start loading YouTube API
+  queueStore.fetchSongs(); // Fetch songs from the store
   subscribeToQueueUpdates();
 
   showPlayer.value = true;
-  if (!isYouTubeAPILoaded.value) await waitForYouTubeAPI();
   initializePlayer();
 });
 
@@ -317,34 +271,59 @@ onUnmounted(() => {
 });
 
 // Watch for changes in the song queue
-watch(songList, async (newList) => {
+watch(queueStore.queue.songList, async (newList) => {
   if (newList.length > 0) {
-    showPlayer.value = true; // Show the player UI
-
     // Ensure YouTube API is loaded before initializing the player
     if (!isYouTubeAPILoaded.value) {
-      await waitForYouTubeAPI(); // Wait before initializing
+      await loadYouTubeAPI();
     }
 
+    if (player && playerReady) {
+      player.loadVideoById(
+        queueStore.queue.songList[currentVideoIndex.value]?.video_id
+      );
+    } else {
+      console.log("Player not ready. Queuing song.");
+      pendingVideoIndex.value = currentVideoIndex.value;
+      loadPlayer(); // loadPlayer() will call initializePlayer()
+    }
+
+    showPlayer.value = true; // Show the player UI
     initializePlayer();
   }
 });
 
 // Function to initialize yt player
 const initializePlayer = () => {
+  const currentSong = queueStore.queue.songList[currentVideoIndex.value];
+  if (!currentSong) {
+    console.warn("No current song to load.");
+    return;
+  }
+
   player = new window.YT.Player("player", {
     height: "360",
     width: "640",
-    videoId: songList.value[currentVideoIndex.value].video_id,
+    videoId: queueStore.queue.songList[currentVideoIndex.value]?.video_id || "",
     playerVars: {
       autoplay: 1,
-      controls: 1, // No controls
-      modestbranding: 0, // Hide YouTube branding
-      rel: 1, // Prevent related videos
-      showinfo: 1, // Hide video info
-      iv_load_policy: 3, // Hide annotations
+      controls: 1,
+      modestbranding: 0,
+      rel: 0,
+      showinfo: 0,
+      iv_load_policy: 3,
     },
     events: {
+      onReady: () => {
+        playerReady = true;
+        console.log("Player is ready.");
+
+        if (pendingVideoIndex !== null) {
+          // console.log("Playing pending video:", pendingVideoIndex);
+          playSong(pendingVideoIndex.value);
+          pendingVideoIndex = null;
+        }
+      },
       onStateChange: onPlayerStateChange,
     },
   });
@@ -352,24 +331,43 @@ const initializePlayer = () => {
 
 // Function to show player when thumbnail is clicked
 const loadPlayer = () => {
-  showPlayer.value = true;
-  setTimeout(() => {
+  if (window.YT && window.YT.Player) {
     initializePlayer();
-  }, 500);
+  } else {
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = () => {
+      initializePlayer();
+    };
+  }
 };
 
 // Function to Play Song from Queue
+// TODO: Move to store
 const playSong = (index: number) => {
-  if (!songList.value.length || !songList.value[index]) {
-    console.warn("No valid song found to play.");
+  if (!queueStore.queue.songList.length) {
+    console.warn("No songs in the list.");
+    return;
+  }
+
+  const song = queueStore.queue.songList[index];
+  if (!song) {
+    console.warn("Invalid index:", index);
     return;
   }
 
   currentVideoIndex.value = index;
-  if (player) {
-    player.loadVideoById(songList.value[index].video_id);
+
+  if (player && playerReady) {
+    // console.log("Playing video:", song.video_id);
+    player.loadVideoById(song.video_id);
   } else {
-    loadPlayer();
+    console.log("Player not ready. Queuing song.");
+    pendingVideoIndex.value = index;
+    loadPlayer(); // loadPlayer() will call initializePlayer()
   }
 };
 
@@ -377,7 +375,8 @@ const playSong = (index: number) => {
 const onPlayerStateChange = async (event: any) => {
   if (event.data === window.YT.PlayerState.PLAYING) {
     // Set the current song BEFORE removing it from the queue
-    currentSong.value = songList.value[currentVideoIndex.value];
+    queueStore.queue.currentSong =
+      queueStore.queue.songList[currentVideoIndex.value];
 
     // Remove current song from queue, but let it play fully
     setTimeout(async () => {
@@ -389,11 +388,11 @@ const onPlayerStateChange = async (event: any) => {
 
   if (event.data === window.YT.PlayerState.ENDED) {
     // Only move to the next song when the current one has finished
-    if (songList.value.length > 0) {
+    if (queueStore.queue.songList.length > 0) {
       playSong(0); // Play the next song in queue
     } else {
       // Nothing else to play, reset all players
-      player.stopVideo();
+      console.log("No more songs in queue. Resetting player.");
       player = null;
       showPlayer.value = false;
       isYouTubeAPILoaded.value = false;
@@ -401,6 +400,7 @@ const onPlayerStateChange = async (event: any) => {
   }
 };
 
+// TODO: Move to store
 const removeCurrentSongFromQueue = async () => {
   try {
     let { data, error: fetchError } = await supabase
@@ -414,7 +414,7 @@ const removeCurrentSongFromQueue = async () => {
     const updatedQueue =
       data?.queue?.filter(
         (song: { video_id: string }) =>
-          song.video_id !== currentSong.value?.video_id
+          song.video_id !== queueStore.queue.currentSong?.video_id
       ) || [];
 
     const { error: updateError } = await supabase
@@ -424,7 +424,7 @@ const removeCurrentSongFromQueue = async () => {
 
     if (updateError) throw updateError;
 
-    songList.value = updatedQueue; // Update UI (removes from queue list)
+    queueStore.queue.songList = updatedQueue; // Update UI (removes from queue list)
   } catch (error: any) {
     console.error("Error updating queue in DB:", error.message);
   }

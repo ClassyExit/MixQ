@@ -10,4 +10,12 @@ declare global {
     duration: string;
     thumbnail: string;
   }
+
+  interface Song {
+    video_id: string;
+    title: string;
+    duration: string;
+    thumbnail: string;
+    imageError?: boolean | false;
+  }
 }

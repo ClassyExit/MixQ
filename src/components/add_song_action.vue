@@ -1,6 +1,6 @@
 <template>
   <button
-    @click="addSong"
+    @click="handleAddSong"
     :disabled="loading"
     class="btn btn-sm ml-auto text-content-base"
     aria-label="Add Song"
@@ -25,9 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { supabase } from "../utils/supabase";
+import { useQueueStore } from "../stores/queue";
 import { ref } from "vue";
-import { showNotification } from "../utils/notifications";
 
 const props = defineProps<{
   video_id: string;
@@ -37,52 +36,20 @@ const props = defineProps<{
   code: string;
 }>();
 
+const queueStore = useQueueStore();
+
 const loading = ref(false);
 
-const addSong = async () => {
+const handleAddSong = async () => {
   loading.value = true;
 
-  try {
-    // Fetch existing queue
-    const { data, error: fetchError } = await supabase
-      .from("songs")
-      .select("queue")
-      .eq("code", props.code)
-      .maybeSingle();
+  await queueStore.addSong({
+    video_id: props.video_id,
+    title: props.title,
+    thumbnail: props.thumbnail,
+    duration: props.duration,
+  });
 
-    // Ensure queue is an array
-    let existingQueue = Array.isArray(data?.queue) ? data.queue : [];
-
-    // If song already exists in queue, don't add duplicate
-    if (existingQueue.some((song) => song.video_id === props.video_id)) {
-      showNotification("Song already in queue", "info");
-      return;
-    }
-
-    // Append new song
-    const updatedQueue = [
-      ...existingQueue,
-      {
-        video_id: props.video_id,
-        title: props.title,
-        thumbnail: props.thumbnail,
-        duration: props.duration,
-      },
-    ];
-
-    // Update database with new queue
-    const { error: updateError } = await supabase
-      .from("songs")
-      .update({ queue: updatedQueue })
-      .eq("code", props.code);
-
-    if (updateError || fetchError)
-      showNotification("Failed to add song", "error");
-    else showNotification("Song added to queue", "success");
-  } catch (error: any) {
-    showNotification("Failed to add song", "error");
-  } finally {
-    loading.value = false;
-  }
+  loading.value = false;
 };
 </script>

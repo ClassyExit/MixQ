@@ -21,7 +21,7 @@
           </h2>
           <input
             class="input w-full"
-            v-model="roomCode"
+            v-model="roomId"
             placeholder="Enter room code"
             autofocus="false"
             tabindex="-1"
@@ -37,15 +37,18 @@ import { ref } from "vue";
 import { supabase } from "../utils/supabase";
 import { showNotification } from "../utils/notifications";
 import { useRouter } from "vue-router";
+import { useQueueStore } from "../stores/queue";
+
+const queueStore = useQueueStore();
 
 const router = useRouter();
 
-const roomCode = ref("");
+const roomId = ref("");
 
 const isCheckingRoom = ref(false);
 
 const joinRoom = async () => {
-  if (!roomCode.value) return;
+  if (!roomId.value) return;
 
   isCheckingRoom.value = true;
 
@@ -53,12 +56,12 @@ const joinRoom = async () => {
   const { data, error } = await supabase
     .from("room")
     .select()
-    .eq("code", roomCode.value.trim())
+    .eq("code", roomId.value.trim())
     .maybeSingle();
 
   if (error || !data) {
     showNotification(
-      `No room found with room code: ${roomCode.value}`,
+      `No room found with room code: ${roomId.value}`,
       "error",
       3000
     );
@@ -67,6 +70,7 @@ const joinRoom = async () => {
   }
 
   isCheckingRoom.value = false;
+  queueStore.setHostRoom(roomId.value); // Set the room ID in the store
   // Redirect to host room
   router.push({ name: "Host", params: { id: data.code } });
 };

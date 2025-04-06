@@ -22,6 +22,9 @@ import { ref } from "vue";
 import { supabase } from "../utils/supabase";
 import { useRouter } from "vue-router";
 import { showNotification } from "../utils/notifications";
+import { useQueueStore } from "../stores/queue";
+
+const queueStore = useQueueStore();
 
 const router = useRouter();
 
@@ -70,7 +73,8 @@ const createHostRoom = async () => {
 
     if (queueError) showNotification(queueError.message, "error", 3000);
 
-    showNotification("Created room", "success", 3000);
+    queueStore.setHostRoom(roomId); // Set the room ID in the store
+    showNotification("Created room", "success", 1500);
     router.push({ name: "Host", params: { id: roomId } });
   } catch (error: any) {
     showNotification("Error creating room. Please try again", "error", 3000);
