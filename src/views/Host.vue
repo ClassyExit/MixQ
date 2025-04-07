@@ -57,9 +57,7 @@
       </div>
       <div
         class="controls flex flex-col gap-2"
-        v-if="
-          queueStore.queue.currentSong && queueStore.queue.songList.length > 0
-        "
+        v-if="queueStore.queue.currentSong"
       >
         <div class="flex items-center justify-center">
           <button
@@ -214,7 +212,6 @@ const roomLinkValue = `https://mixq.xyz/room/${roomId.value}`;
 
 let player: any = null;
 let playerReady = false;
-let pendingVideoIndex = ref<number | null>(null);
 const showPlayer = ref(false);
 const isYouTubeAPILoaded = ref(false);
 
@@ -301,10 +298,7 @@ const initializePlayer = () => {
         duration.value = player.getDuration();
         startProgressTimer();
 
-        if (pendingVideoIndex.value !== null) {
-          playSong(pendingVideoIndex.value);
-          pendingVideoIndex.value = null;
-        }
+        playSong(queueStore.queue.currentVideoIndex);
       },
       onStateChange: onPlayerStateChange,
     },
@@ -338,7 +332,6 @@ const playSong = (index: number) => {
     currentTime.value = 0;
     startProgressTimer();
   } else {
-    pendingVideoIndex.value = index;
     loadPlayer();
   }
 };

@@ -31,6 +31,9 @@ export const useQueueStore = defineStore("queue", {
   actions: {
     setHostRoom(code: string) {
       this.queue.id = code;
+      this.queue.songList = []; // Reset song list
+      this.queue.currentSong = null; // Reset current song
+      this.queue.currentVideoIndex = 0; // Reset current video index
     },
 
     async fetchSongs() {
