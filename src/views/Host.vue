@@ -57,7 +57,9 @@
       </div>
       <div
         class="controls flex flex-col gap-2"
-        v-if="queueStore.queue.currentSong"
+        v-if="
+          queueStore.queue.currentSong && queueStore.queue.songList.length > 0
+        "
       >
         <div class="flex items-center justify-center">
           <button
