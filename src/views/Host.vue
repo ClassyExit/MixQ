@@ -196,7 +196,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { supabase } from "../utils/supabase";
+
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
 import delete_song_action from "../components/delete_song_action.vue";
 import { useQueueStore } from "../stores/queue";
@@ -209,7 +209,6 @@ const router = useRouter();
 const roomId = ref((router.currentRoute.value.params.id as string) || "");
 useQueueStore().setHostRoom(roomId.value);
 const roomLinkValue = `https://mixq.xyz/room/${roomId.value}`;
-let queueSubscription: any = null;
 
 let player: any = null;
 let playerReady = false;
@@ -221,29 +220,9 @@ const containerClass = computed(() => {
   return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[500px] 2xl:h-[700px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
 });
 
-const currentVideoIndex = ref(0);
-const repeatEnabled = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
 let progressTimer: any = null;
-
-const subscribeToQueueUpdates = () => {
-  queueSubscription = supabase
-    .channel(`room-queue-updates-${roomId.value}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "songs",
-        filter: `code=eq.${roomId.value}`,
-      },
-      (payload) => {
-        queueStore.queue.songList = payload.new.queue;
-      }
-    )
-    .subscribe();
-};
 
 const loadYouTubeAPI = () => {
   if (window.YT && window.YT.Player) {
@@ -275,15 +254,14 @@ const loadYouTubeAPI = () => {
 
 onMounted(async () => {
   await loadYouTubeAPI();
-  queueStore.fetchSongs();
-  subscribeToQueueUpdates();
+  queueStore.fetchSongs(); // Fetch songs from the server
+  queueStore.subscribeToQueueUpdates(); // Subscribe to queue updates
   showPlayer.value = true;
   initializePlayer();
 });
 
 onUnmounted(() => {
-  if (queueSubscription) supabase.removeChannel(queueSubscription);
-  clearInterval(progressTimer);
+  queueStore.unsubscribe(); // Unsubscribe from queue updates
 });
 
 watch(
@@ -292,22 +270,21 @@ watch(
     if (newQueue.length > 0 && !queueStore.queue.currentSong) {
       playSong(0);
     }
-  }
+  },
+  { immediate: true } // This triggers the watcher on initial mount too
 );
-
-watch(currentVideoIndex, (index) => {
-  queueStore.queue.currentSong = queueStore.queue.songList[index] || null;
-});
 
 const initializePlayer = () => {
   if (player || !window.YT || !window.YT.Player) return;
-  const song = queueStore.queue.songList[currentVideoIndex.value];
+
+  // Only load the player if there is a song in the queue
+  const song = queueStore.queue.songList[queueStore.queue.currentVideoIndex];
   if (!song) return;
 
   player = new window.YT.Player("player", {
     height: "360",
     width: "640",
-    videoId: song.video_id,
+    videoId: queueStore.queue.currentSong?.video_id,
     playerVars: {
       autoplay: 1,
       controls: 1,
@@ -350,7 +327,8 @@ const playSong = (index: number) => {
   const song = queueStore.queue.songList[index];
   if (!song) return;
 
-  currentVideoIndex.value = index;
+  queueStore.queue.currentVideoIndex = index;
+  queueStore.queue.currentSong = song;
 
   if (player && playerReady) {
     player.loadVideoById(song.video_id);
@@ -375,28 +353,32 @@ const skipSong = () => {
   }
 };
 
+let alreadyRemoved = false;
+
+// Handle YT player state changes
 const onPlayerStateChange = async (event: any) => {
   if (event.data === window.YT.PlayerState.PLAYING) {
-    queueStore.queue.currentSong =
-      queueStore.queue.songList[currentVideoIndex.value];
-    startProgressTimer();
+    // Dont process if already removed from queue
+    if (!alreadyRemoved) {
+      alreadyRemoved = true;
 
-    setTimeout(async () => {
-      if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-        await queueStore.removeCurrentSongFromQueue();
-      }
-    }, 1500);
+      // Update the current song in the queue
+      queueStore.queue.currentSong =
+        queueStore.queue.songList[queueStore.queue.currentVideoIndex] || null;
+
+      setTimeout(async () => {
+        if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+          await queueStore.removeCurrentSongFromQueue();
+        }
+      }, 1500);
+    }
   }
 
   if (event.data === window.YT.PlayerState.ENDED) {
-    if (repeatEnabled.value) {
-      player.seekTo(0);
-      player.playVideo();
-      return;
-    }
+    alreadyRemoved = false; // Reset for next
 
     if (queueStore.queue.songList.length > 0) {
-      playSong(0);
+      playSong(0); // Next song
     } else {
       player = null;
       showPlayer.value = false;

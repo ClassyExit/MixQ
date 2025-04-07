@@ -4,15 +4,14 @@ import { showNotification } from "../utils/notifications";
 
 export const useQueueStore = defineStore("queue", {
   state: () => ({
-    room: {
-      id: null as string | null,
-    },
-
     queue: {
+      id: null as string | null, // Room ID
       currentSong: null as Song | null,
       songList: [] as Song[],
       currentVideoIndex: 0,
     },
+
+    subscription: null as any,
   }),
   getters: {
     runTime(state): string {
@@ -31,14 +30,14 @@ export const useQueueStore = defineStore("queue", {
   },
   actions: {
     setHostRoom(code: string) {
-      this.room.id = code;
+      this.queue.id = code;
     },
 
     async fetchSongs() {
       const { data, error } = await supabase
         .from("songs")
         .select("queue")
-        .eq("code", this.room.id)
+        .eq("code", this.queue.id)
         .maybeSingle();
 
       if (error) {
@@ -54,7 +53,7 @@ export const useQueueStore = defineStore("queue", {
     },
 
     async addSong(song: Song) {
-      if (!this.room.id) {
+      if (!this.queue.id) {
         showNotification(
           "Unable to get room ID, please create a new room or rejoin. ",
           "error"
@@ -67,7 +66,7 @@ export const useQueueStore = defineStore("queue", {
         const { data, error: fetchError } = await supabase
           .from("songs")
           .select("queue")
-          .eq("code", this.room.id)
+          .eq("code", this.queue.id)
           .maybeSingle();
 
         if (fetchError) {
@@ -90,7 +89,7 @@ export const useQueueStore = defineStore("queue", {
         const { error: updateError } = await supabase
           .from("songs")
           .update({ queue: updatedQueue })
-          .eq("code", this.room.id);
+          .eq("code", this.queue.id);
 
         if (updateError) {
           showNotification("Failed to update queue", "error");
@@ -106,7 +105,7 @@ export const useQueueStore = defineStore("queue", {
     },
 
     async removeSong(video_id: string) {
-      if (!this.room.id) {
+      if (!this.queue.id) {
         showNotification("No room ID set", "error");
         return;
       }
@@ -116,7 +115,7 @@ export const useQueueStore = defineStore("queue", {
         const { data, error: fetchError } = await supabase
           .from("songs")
           .select("queue")
-          .eq("code", this.room.id)
+          .eq("code", this.queue.id)
           .maybeSingle();
 
         if (fetchError) {
@@ -135,7 +134,7 @@ export const useQueueStore = defineStore("queue", {
         const { error: updateError } = await supabase
           .from("songs")
           .update({ queue: updatedQueue })
-          .eq("code", this.room.id);
+          .eq("code", this.queue.id);
 
         if (updateError) {
           showNotification("Failed to remove song", "error");
@@ -156,7 +155,7 @@ export const useQueueStore = defineStore("queue", {
         let { data, error: fetchError } = await supabase
           .from("songs")
           .select("queue")
-          .eq("code", this.room.id)
+          .eq("code", this.queue.id)
           .single();
 
         if (fetchError) throw fetchError;
@@ -170,13 +169,43 @@ export const useQueueStore = defineStore("queue", {
         const { error: updateError } = await supabase
           .from("songs")
           .update({ queue: updatedQueue })
-          .eq("code", this.room.id);
+          .eq("code", this.queue.id);
 
         if (updateError) throw updateError;
 
         this.queue.songList = updatedQueue; // Update UI (removes from queue list)
       } catch (error: any) {
         console.error("Error updating queue in DB:", error.message);
+      }
+    },
+
+    async subscribeToQueueUpdates() {
+      if (this.subscription) {
+        console.warn("Already subscribed to queue updates.");
+        return;
+      }
+
+      this.subscription = supabase
+        .channel("room-" + this.queue.id)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "songs",
+            filter: `code=eq.${this.queue.id}`,
+          },
+          (payload) => {
+            this.queue.songList = payload.new.queue || [];
+          }
+        )
+        .subscribe();
+    },
+
+    async unsubscribe() {
+      if (this.subscription) {
+        await supabase.removeChannel(this.subscription);
+        this.subscription = null;
       }
     },
   },
