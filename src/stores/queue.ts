@@ -17,15 +17,29 @@ export const useQueueStore = defineStore("queue", {
     runTime(state): string {
       if (!state.queue.songList.length) return "0 mins";
 
+      // Calculate total duration in seconds
       const totalSeconds = state.queue.songList.reduce((acc, song) => {
-        const [minutes, seconds] = song.duration.split(":").map(Number);
-        return acc + minutes * 60 + seconds;
+        const parts = song.duration.split(":").map(Number);
+
+        // Handle different formats
+        const seconds = parts.pop() || 0;
+        const minutes = parts.pop() || 0;
+        const hours = parts.pop() || 0;
+
+        return acc + hours * 3600 + minutes * 60 + seconds;
       }, 0);
 
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-      return hours > 0 ? `${hours} hours, ${minutes} mins` : `${minutes} mins`;
+      // Return in a formatted string
+      if (hours > 0) {
+        return `${hours} hours, ${minutes} mins`;
+      } else if (minutes > 0) {
+        return `${minutes} mins`;
+      } else {
+        return `${Math.floor(totalSeconds % 60)} secs`; // For edge case where there are seconds but no minutes
+      }
     },
   },
   actions: {

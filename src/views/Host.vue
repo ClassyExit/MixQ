@@ -55,12 +55,14 @@
           <div v-else id="player" class="w-full h-full overflow-hidden"></div>
         </div>
       </div>
+
       <div
         class="controls flex flex-col gap-2"
         v-if="queueStore.queue.currentSong"
       >
         <div class="flex items-center justify-center">
           <button
+            v-if="queueStore.queue.songList.length > 0"
             @click="skipSong"
             class="cursor-pointer btn btn-error text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl 6xl:text-5xl px-4 py-2 xl:px-5 xl:py-2.5 2xl:px-6 2xl:py-3 3xl:px-14 3xl:py-7 4xl:px-16 4xl:py-8 5xl:px-20 5xl:py-10 6xl:px-24 6xl:py-12"
           >
@@ -90,7 +92,7 @@
           <span
             class="flex items-center justify-between w-full space-x-1 lg:space-x-2"
           >
-            <div class="flex flex-row items-center space-x-2 px-2">
+            <div class="flex flex-row items-center space-x-2">
               <div class="">({{ queue.songList.length }})</div>
             </div>
 
@@ -211,7 +213,7 @@ useQueueStore().setHostRoom(roomId.value);
 const roomLinkValue = `https://mixq.xyz/room/${roomId.value}`;
 
 let player: any = null;
-let playerReady = false;
+let playerReady = ref(false);
 const showPlayer = ref(false);
 const isYouTubeAPILoaded = ref(false);
 
@@ -226,7 +228,7 @@ let progressTimer: any = null;
 const loadYouTubeAPI = () => {
   if (window.YT && window.YT.Player) {
     isYouTubeAPILoaded.value = true;
-    return true;
+    return;
   }
 
   return new Promise((resolve) => {
@@ -256,22 +258,12 @@ onMounted(async () => {
   queueStore.fetchSongs(); // Fetch songs from the server
   queueStore.subscribeToQueueUpdates(); // Subscribe to queue updates
   showPlayer.value = true;
-  initializePlayer();
+  loadPlayer(); // Load the YouTube player
 });
 
 onUnmounted(() => {
   queueStore.unsubscribe(); // Unsubscribe from queue updates
 });
-
-watch(
-  () => queueStore.queue.songList,
-  (newQueue) => {
-    if (newQueue.length > 0 && !queueStore.queue.currentSong) {
-      playSong(0);
-    }
-  },
-  { immediate: true } // This triggers the watcher on initial mount too
-);
 
 const initializePlayer = () => {
   if (player || !window.YT || !window.YT.Player) return;
@@ -294,7 +286,7 @@ const initializePlayer = () => {
     },
     events: {
       onReady: () => {
-        playerReady = true;
+        playerReady.value = true;
         duration.value = player.getDuration();
         startProgressTimer();
 
@@ -337,7 +329,7 @@ const playSong = (index: number) => {
 };
 
 const skipSong = () => {
-  if (queueStore.queue.songList.length > 1) {
+  if (queueStore.queue.songList.length > 0) {
     queueStore.removeCurrentSongFromQueue();
     currentTime.value = 0;
     playSong(0);
@@ -375,9 +367,9 @@ const onPlayerStateChange = async (event: any) => {
     if (queueStore.queue.songList.length > 0) {
       playSong(0); // Next song
     } else {
-      player = null;
-      showPlayer.value = false;
-      isYouTubeAPILoaded.value = false;
+      queueStore.queue.currentSong = null; // No song to play
+      player.destroy(); // Destroy the player
+      player = null; // Reset player
     }
   }
 };
@@ -399,6 +391,16 @@ const seekTo = (e: Event) => {
     player.seekTo(value);
   }
 };
+
+watch(
+  () => queueStore.queue.songList,
+  (newQueue) => {
+    if (newQueue.length > 0 && !queueStore.queue.currentSong) {
+      playSong(0);
+    }
+  },
+  { immediate: true } // This triggers the watcher on initial mount too
+);
 </script>
 
 <style scoped>
