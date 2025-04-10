@@ -37,22 +37,38 @@
       </div>
 
       <div class="bg-base-200 flex-grow h-96 md:h-1/2 rounded">
-        <div :class="containerClass">
+        <div :class="containerClass" class="relative w-full h-full">
           <!-- Show thumbnail if the player hasn't loaded -->
           <div
             v-if="!showPlayer"
-            class="relative w-full h-full cursor-pointer"
+            class="w-full h-full cursor-pointer relative"
             @click="loadPlayer"
           >
             <button
-              class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-3xl"
+              class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-3xl w-full h-full"
             >
               ▶
             </button>
           </div>
 
           <!-- YouTube Player -->
-          <div v-else id="player" class="w-full h-full overflow-hidden"></div>
+          <div v-else class="relative w-full h-full overflow-hidden">
+            <!-- Player container -->
+            <div
+              :class="queueStore.queue.showOverlay ? 'm-2' : ''"
+              class="absolute inset-0 z-10 w-full h-full"
+              id="player"
+            ></div>
+
+            <!-- Overlay container -->
+            <div
+              v-if="queueStore.queue.showOverlay"
+              class="absolute inset-0 h-full w-full bg-white z-50 flex items-center justify-center"
+              id="overlay"
+            >
+              <Overlay />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -60,14 +76,93 @@
         class="controls flex flex-col gap-2"
         v-if="queueStore.queue.currentSong"
       >
-        <div class="flex items-center justify-center">
-          <button
-            v-if="queueStore.queue.songList.length > 0"
-            @click="skipSong"
-            class="cursor-pointer btn btn-error text-base xl:text-lg 2xl:text-xl 3xl:text-2xl 4xl:text-3xl 5xl:text-4xl 6xl:text-5xl px-4 py-2 xl:px-5 xl:py-2.5 2xl:px-6 2xl:py-3 3xl:px-14 3xl:py-7 4xl:px-16 4xl:py-8 5xl:px-20 5xl:py-10 6xl:px-24 6xl:py-12"
-          >
-            Skip
-          </button>
+        <div class="flex items-center justify-between px-4">
+          <div class="flex items-center justify-start">
+            <div v-if="queue.showOverlay" @click="showVideo()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                class="w-10 h-10 xl:w-16 xl:h-16 2xl:w-24 2xl:h-24 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 5xl:w-48 5xl:h-48 6xl:w-54 6xl:h-54"
+              >
+                <path
+                  fill="currentColor"
+                  d="M7 16h6q.425 0 .713-.288T14 15v-2.2l2.775 2.225q.375.3.8.1T18 14.45v-4.9q0-.475-.425-.675t-.8.1L14 11.2V9q0-.425-.288-.712T13 8H7q-.425 0-.712.288T6 9v6q0 .425.288.713T7 16m-3 4q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20z"
+                />
+              </svg>
+            </div>
+
+            <div v-else @click="showOverlay()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                class="w-10 h-10 xl:w-16 xl:h-16 2xl:w-24 2xl:h-24 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 5xl:w-48 5xl:h-48 6xl:w-54 6xl:h-54"
+              >
+                <path
+                  fill="currentColor"
+                  d="M10.5 17q1.05 0 1.775-.725T13 14.5V9h3V7h-4v5.5q-.325-.225-.7-.363T10.5 12q-1.05 0-1.775.725T8 14.5t.725 1.775T10.5 17M4 20q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V6H4zm0 0V6z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="flex space-x-4 items-center justify-center">
+            <button
+              v-if="queueStore.queue.currentSong"
+              @click="togglePlayPause"
+              class="cursor-pointer"
+            >
+              <svg
+                v-if="isPaused"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                class="w-10 h-10 xl:w-16 xl:h-16 2xl:w-24 2xl:h-24 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 5xl:w-48 5xl:h-48 6xl:w-54 6xl:h-54"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="m9.5 16.5l7-4.5l-7-4.5zM12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
+                />
+              </svg>
+
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                class="w-10 h-10 xl:w-16 xl:h-16 2xl:w-24 2xl:h-24 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 5xl:w-48 5xl:h-48 6xl:w-54 6xl:h-54"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M9 16h2V8H9zm4 0h2V8h-2zm-1 6q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
+                />
+              </svg>
+            </button>
+            <button
+              v-if="queueStore.queue.songList.length > 0"
+              @click="skipSong"
+              class="cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                class="w-10 h-10 xl:w-16 xl:h-16 2xl:w-24 2xl:h-24 3xl:w-32 3xl:h-32 4xl:w-40 4xl:h-40 5xl:w-48 5xl:h-48 6xl:w-54 6xl:h-54"
+              >
+                <path
+                  fill="currentColor"
+                  d="M16.5 18V6h2v12zm-11 0V6l9 6zm2-3.75L10.9 12L7.5 9.75z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class=""></div>
         </div>
         <div class="w-full px-4">
           <input
@@ -198,6 +293,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import Overlay from "../components/Overlay.vue";
 
 import QRCodeGenerator from "../components/QRCodeGenerator.vue";
 import delete_song_action from "../components/delete_song_action.vue";
@@ -221,9 +317,32 @@ const containerClass = computed(() => {
   return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[500px] 2xl:h-[700px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
 });
 
+const showVideo = () => {
+  queueStore.queue.showOverlay = false;
+};
+
+const showOverlay = () => {
+  queueStore.queue.showOverlay = true;
+};
+
 const currentTime = ref(0);
 const duration = ref(0);
 let progressTimer: any = null;
+
+const isPaused = ref(false);
+
+const togglePlayPause = () => {
+  if (!player) return;
+
+  const playerState = player.getPlayerState();
+  if (playerState === window.YT.PlayerState.PLAYING) {
+    player.pauseVideo();
+    isPaused.value = true;
+  } else if (playerState === window.YT.PlayerState.PAUSED) {
+    player.playVideo();
+    isPaused.value = false;
+  }
+};
 
 const loadYouTubeAPI = () => {
   if (window.YT && window.YT.Player) {

@@ -9,6 +9,7 @@ export const useQueueStore = defineStore("queue", {
       currentSong: null as Song | null,
       songList: [] as Song[],
       currentVideoIndex: 0,
+      showOverlay: true,
     },
 
     subscription: null as any,
