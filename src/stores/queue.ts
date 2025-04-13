@@ -226,5 +226,9 @@ export const useQueueStore = defineStore("queue", {
         this.subscription = null;
       }
     },
+
+    toggleOverlay() {
+      this.queue.showOverlay = !this.queue.showOverlay;
+    },
   },
 });

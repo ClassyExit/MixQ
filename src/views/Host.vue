@@ -77,8 +77,11 @@
         v-if="queueStore.queue.currentSong"
       >
         <div class="flex items-center justify-between px-4">
-          <div class="flex items-center justify-start">
-            <div v-if="queue.showOverlay" @click="showVideo()">
+          <div
+            class="flex items-center justify-start"
+            @click="queueStore.toggleOverlay()"
+          >
+            <div v-if="queue.showOverlay">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -93,7 +96,7 @@
               </svg>
             </div>
 
-            <div v-else @click="showOverlay()">
+            <div v-else>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -317,14 +320,6 @@ const containerClass = computed(() => {
   return "h-[400px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[500px] 2xl:h-[700px] 3xl:h-[1000px] 4xl:h-[1400px] 5xl:h-[2000px] 6xl:h-[3000px] relative rounded-box shadow-md overflow-hidden";
 });
 
-const showVideo = () => {
-  queueStore.queue.showOverlay = false;
-};
-
-const showOverlay = () => {
-  queueStore.queue.showOverlay = true;
-};
-
 const currentTime = ref(0);
 const duration = ref(0);
 let progressTimer: any = null;
@@ -344,40 +339,40 @@ const togglePlayPause = () => {
   }
 };
 
-const loadYouTubeAPI = () => {
-  if (window.YT && window.YT.Player) {
-    isYouTubeAPILoaded.value = true;
-    return;
+const playSong = (index: number) => {
+  const song = queueStore.queue.songList[index];
+  if (!song) return;
+
+  queueStore.queue.currentVideoIndex = index;
+  queueStore.queue.currentSong = song;
+
+  if (player && playerReady) {
+    player.loadVideoById(song.video_id);
+    duration.value = player.getDuration();
+    currentTime.value = 0;
+    startProgressTimer();
+  } else {
+    loadPlayer();
   }
+};
 
-  return new Promise((resolve) => {
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(tag);
-
-    window.onYouTubeIframeAPIReady = () => {
-      isYouTubeAPILoaded.value = true;
-      resolve(true);
-    };
-
-    const checkAPI = () => {
-      if (window.YT && window.YT.Player) {
-        isYouTubeAPILoaded.value = true;
-        resolve(true);
-      } else {
-        requestAnimationFrame(checkAPI);
-      }
-    };
-    checkAPI();
-  });
+const skipSong = () => {
+  if (queueStore.queue.songList.length > 0) {
+    queueStore.removeCurrentSongFromQueue();
+    currentTime.value = 0;
+    playSong(0);
+  } else {
+    player.stopVideo();
+    currentTime.value = 0;
+    queueStore.removeCurrentSongFromQueue();
+  }
 };
 
 onMounted(async () => {
-  await loadYouTubeAPI();
   queueStore.fetchSongs(); // Fetch songs from the server
   queueStore.subscribeToQueueUpdates(); // Subscribe to queue updates
   showPlayer.value = true;
-  loadPlayer(); // Load the YouTube player
+  await loadPlayer(); // Load the YouTube player
 });
 
 onUnmounted(() => {
@@ -385,6 +380,7 @@ onUnmounted(() => {
 });
 
 const initializePlayer = () => {
+  // Load the Youtube player to the DOM
   if (player || !window.YT || !window.YT.Player) return;
 
   // Only load the player if there is a song in the queue
@@ -416,47 +412,42 @@ const initializePlayer = () => {
   });
 };
 
-const loadPlayer = () => {
+const loadPlayer = async () => {
+  // Handle loading the player
+
+  await loadYouTubeAPI();
+  initializePlayer();
+};
+
+const loadYouTubeAPI = () => {
+  // Load the YouTube API and script
   if (window.YT && window.YT.Player) {
-    initializePlayer();
-  } else {
+    isYouTubeAPILoaded.value = true;
+    return;
+  }
+
+  if (isYouTubeAPILoaded.value) return; // Prevent loading multiple times
+
+  return new Promise((resolve) => {
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName("script")[0];
-    firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+    document.body.appendChild(tag);
+
     window.onYouTubeIframeAPIReady = () => {
-      initializePlayer();
+      isYouTubeAPILoaded.value = true;
+      resolve(true);
     };
-  }
-};
 
-const playSong = (index: number) => {
-  const song = queueStore.queue.songList[index];
-  if (!song) return;
-
-  queueStore.queue.currentVideoIndex = index;
-  queueStore.queue.currentSong = song;
-
-  if (player && playerReady) {
-    player.loadVideoById(song.video_id);
-    duration.value = player.getDuration();
-    currentTime.value = 0;
-    startProgressTimer();
-  } else {
-    loadPlayer();
-  }
-};
-
-const skipSong = () => {
-  if (queueStore.queue.songList.length > 0) {
-    queueStore.removeCurrentSongFromQueue();
-    currentTime.value = 0;
-    playSong(0);
-  } else {
-    player.stopVideo();
-    currentTime.value = 0;
-    queueStore.removeCurrentSongFromQueue();
-  }
+    const checkAPI = () => {
+      if (window.YT && window.YT.Player) {
+        isYouTubeAPILoaded.value = true;
+        resolve(true);
+      } else {
+        requestAnimationFrame(checkAPI);
+      }
+    };
+    checkAPI();
+  });
 };
 
 let alreadyRemoved = false;
